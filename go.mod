@@ -1,0 +1,14 @@
+module get.porter.sh/plugin/kubernetes
+
+go 1.14
+
+replace github.com/hashicorp/go-plugin => github.com/carolynvs/go-plugin v1.0.1-acceptstdin
+
+require (
+	get.porter.sh/porter v0.31.2
+	github.com/cnabio/cnab-go v0.15.0
+	github.com/hashicorp/go-hclog v0.14.1
+	github.com/hashicorp/go-plugin v1.4.0
+	github.com/pkg/errors v0.9.1
+	github.com/spf13/cobra v1.1.1
+)
