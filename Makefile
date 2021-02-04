@@ -55,47 +55,24 @@ test-unit: build
 	$(GO) test ./...;	
 
 test-integration: build
-	export CURRENT_CONTEXT=$$(kubectl config current-context); \
- 	kubectl config use-context $(KUBERNETES_CONTEXT); \
-	$(GO) test -tags=integration ./tests/integration/...;	\
-	if [[ ! -z $$CURRENT_CONTEXT ]]; then \
-		kubectl config use-context $$CURRENT_CONTEXT; \
+	export CURRENT_CONTEXT=$$(kubectl config current-context)
+ 	kubectl config use-context $(KUBERNETES_CONTEXT)
+	$(GO) test -tags=integration ./tests/integration/...
+	if [[ ! -z $$CURRENT_CONTEXT ]]; then 
+		kubectl config use-context $$CURRENT_CONTEXT; 
 	fi
 
 test-in-kubernetes: build
-	export CURRENT_CONTEXT=$$(kubectl config current-context); \
- 	kubectl config use-context $(KUBERNETES_CONTEXT); \
-	kubectl apply -f tests/setup.yaml; \
-	docker build -f ./tests/Dockerfile -t localhost:5000/test:latest .; \
-	docker push localhost:5000/test:latest; \
-	kubectl run test-$$RANDOM --attach=true --image=localhost:5000/test:latest --restart=Never --serviceaccount=porter-plugin-test-sa -n porter-plugin-test-ns; \
-	kubectl delete -f tests/setup.yaml; \
-	if [[ ! -z $$CURRENT_CONTEXT ]]; then \
-		kubectl config use-context $$CURRENT_CONTEXT; \
+	export CURRENT_CONTEXT=$$(kubectl config current-context)
+ 	kubectl config use-context $(KUBERNETES_CONTEXT)
+	kubectl apply -f tests/setup.yaml
+	docker build -f ./tests/Dockerfile -t localhost:5000/test:latest .
+	docker push localhost:5000/test:latest
+	kubectl run test-$$RANDOM --attach=true --image=localhost:5000/test:latest --restart=Never --serviceaccount=porter-plugin-test-sa -n porter-plugin-test-ns
+	kubectl delete -f tests/setup.yaml
+	if [[ ! -z $$CURRENT_CONTEXT ]]; then
+		kubectl config use-context $$CURRENT_CONTEXT
 	fi
-
-publish: bin/porter$(FILE_EXT)
-	# AZURE_STORAGE_CONNECTION_STRING will be used for auth in the following commands
-	if [[ "$(PERMALINK)" == "latest" ]]; then \
-		az storage blob upload-batch -d porter/plugins/$(PLUGIN)/$(VERSION) -s $(BINDIR)/$(VERSION); \
-		az storage blob upload-batch -d porter/plugins/$(PLUGIN)/$(PERMALINK) -s $(BINDIR)/$(VERSION); \
-	else \
-		mv $(BINDIR)/$(VERSION) $(BINDIR)/$(PERMALINK); \
-		az storage blob upload-batch -d porter/plugins/$(PLUGIN)/$(PERMALINK) -s $(BINDIR)/$(PERMALINK); \
-	fi
-
-	# Generate the plugin feed
-	az storage blob download -c porter -n plugins/atom.xml -f bin/plugins/atom.xml
-	bin/porter mixins feed generate -d bin/plugins -f bin/plugins/atom.xml -t build/atom-template.xml
-	az storage blob upload -c porter -n plugins/atom.xml -f bin/plugins/atom.xml
-
-bin/porter$(FILE_EXT):
-	curl -fsSLo bin/porter$(FILE_EXT) https://cdn.porter.sh/canary/porter-$(CLIENT_PLATFORM)-$(CLIENT_ARCH)$(FILE_EXT)
-	chmod +x bin/porter$(FILE_EXT)
-
-install:
-	mkdir -p $(PORTER_HOME)/plugins/$(PLUGIN)
-	install $(BINDIR)/$(PLUGIN)$(FILE_EXT) $(PORTER_HOME)/plugins/$(PLUGIN)/$(PLUGIN)$(FILE_EXT)
 
 clean:
 	-rm -fr bin/
