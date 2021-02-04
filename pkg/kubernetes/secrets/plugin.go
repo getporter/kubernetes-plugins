@@ -16,7 +16,6 @@ var _ cnabsecrets.Store = &Plugin{}
 
 // Plugin is the plugin wrapper for accessing secrets from Kubernetes Secrets.
 type Plugin struct {
-	logger hclog.Logger
 	cnabsecrets.Store
 }
 

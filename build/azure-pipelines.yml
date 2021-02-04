@@ -12,36 +12,41 @@ trigger:
 pool:
   vmImage: 'Ubuntu 18.04'
 
-steps:
-- task: GoTool@0
-  inputs:
-    version: '1.14.6'
-  displayName: 'Install Go'
+variables:
+  GOVERSION: "1.14.6"
 
-- script: |
-    set -xeuo pipefail
-    mkdir -p /home/vsts/go/bin/
-    echo "##vso[task.prependpath]/home/vsts/go/bin/"
-  displayName: 'Configure Go'
+jobs:
+  - job: build
+    displayName: "Build"
+    steps:
+    - task: GoTool@0
+      inputs:
+        version: "$(GOVERSION)"
+      displayName: 'Install Go'
 
-- script: |
-    make build
-  workingDirectory: '$(System.DefaultWorkingDirectory)'
-  displayName: 'Build'
+    - script: |
+        set -xeuo pipefail
+        mkdir -p /home/vsts/go/bin/
+        echo "##vso[task.prependpath]/home/vsts/go/bin/"
+      displayName: 'Configure Go'
 
-- script: |
-     make test-unit
-  workingDirectory: '$(System.DefaultWorkingDirectory)'
-  displayName: 'Unit Test'
+    - script: |
+        make build
+      workingDirectory: '$(System.DefaultWorkingDirectory)'
+      displayName: 'Build'
 
-- script: |
-    make xbuild-all
-  workingDirectory: '$(System.DefaultWorkingDirectory)'
-  displayName: 'Cross Compile'
+    - script: |
+        make test-unit
+      workingDirectory: '$(System.DefaultWorkingDirectory)'
+      displayName: 'Unit Test'
 
-- script: |
-    export AZURE_STORAGE_CONNECTION_STRING=$(AZURE_STORAGE_CONNECTION_STRING)
-    make publish
-  workingDirectory: '$(System.DefaultWorkingDirectory)'
-  displayName: 'Publish'
-  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    - script: |
+        make xbuild-all
+      workingDirectory: '$(System.DefaultWorkingDirectory)'
+      displayName: 'Cross Compile'
+      
+  - job: integration_test
+    displayName: "Integration Test"
+        steps:
+          - bash: ./build/run-integration-tests.sh
+            displayName: "Integration Test"

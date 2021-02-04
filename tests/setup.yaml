@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: porter-plugin-test-ns
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: porter-plugin-test-sa
+  namespace: porter-plugin-test-ns
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: porter-plugin-test-cr
+rules:
+  - apiGroups: ["rbac.authorization.k8s.io",""]
+    resources: ["namespaces"]
+    verbs: ["get","list","create","delete"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: porter-plugin-test-crb
+subjects:
+- kind: ServiceAccount
+  name: porter-plugin-test-sa
+  namespace: porter-plugin-test-ns
+roleRef:
+  kind: ClusterRole
+  name: porter-plugin-test-cr
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: docker-registry
+  labels:
+    app: registry
+spec:
+  containers:
+  - name: registry
+    image: registry:2.6.2
+    ports:
+    - containerPort: 5000
+      hostPort: 5000
+      protocol: TCP

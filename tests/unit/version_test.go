@@ -1,10 +1,11 @@
-package kubernetes
+package unit
 
 import (
 	"strings"
 	"testing"
 
 	"get.porter.sh/plugin/kubernetes/pkg"
+	"get.porter.sh/plugin/kubernetes/tests"
 	"get.porter.sh/porter/pkg/porter/version"
 	"get.porter.sh/porter/pkg/printer"
 	"github.com/stretchr/testify/require"
@@ -14,12 +15,13 @@ func TestPrintVersion(t *testing.T) {
 	pkg.Commit = "abc123"
 	pkg.Version = "v1.2.3"
 
-	m := NewTestPlugin(t)
+	m := tests.NewTestPlugin(t)
 
 	opts := version.Options{}
 	err := opts.Validate()
 	require.NoError(t, err)
-	m.PrintVersion(opts)
+	err = m.PrintVersion(opts)
+	require.NoError(t, err)
 
 	gotOutput := m.TestContext.GetOutput()
 	wantOutput := "kubernetes v1.2.3 (abc123) by Porter Authors"
@@ -32,13 +34,14 @@ func TestPrintJsonVersion(t *testing.T) {
 	pkg.Commit = "abc123"
 	pkg.Version = "v1.2.3"
 
-	m := NewTestPlugin(t)
+	m := tests.NewTestPlugin(t)
 
 	opts := version.Options{}
 	opts.RawFormat = string(printer.FormatJson)
 	err := opts.Validate()
 	require.NoError(t, err)
-	m.PrintVersion(opts)
+	err = m.PrintVersion(opts)
+	require.NoError(t, err)
 
 	gotOutput := m.TestContext.GetOutput()
 	wantOutput := `{
