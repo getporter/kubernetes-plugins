@@ -24,6 +24,12 @@ kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 networking:
   apiServerAddress: "${CURRENT_HOST_IP}"
+nodes:
+- role: control-plane
+  extraPortMappings:
+  - containerPort: 5000
+    hostPort: 5000
+    protocol: TCP
 EOF
 else
 cat << EOF >> ${KIND_CONFIG_FILE_NAME}
