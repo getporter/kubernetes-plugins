@@ -47,6 +47,6 @@ jobs:
       
   - job: integration_test
     displayName: "Integration Test"
-        steps:
-          - bash: ./build/run-integration-tests.sh
-            displayName: "Integration Test"
+    steps:
+    - bash: ./build/run-integration-tests.sh
+      displayName: "Integration Test"
