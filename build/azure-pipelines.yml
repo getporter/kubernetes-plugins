@@ -40,13 +40,26 @@ jobs:
       workingDirectory: '$(System.DefaultWorkingDirectory)'
       displayName: 'Unit Test'
 
-    - script: |
-        make xbuild-all
-      workingDirectory: '$(System.DefaultWorkingDirectory)'
-      displayName: 'Cross Compile'
-      
+    - task: PublishPipelineArtifact@0
+      displayName: "Publish Native Binaries"
+      inputs:
+        targetPath: $(System.DefaultWorkingDirectory)/bin
+        archiveFilePatterns: "**"
+        artifactName: "build-bin"
+
   - job: integration_test
     displayName: "Integration Test"
+    dependsOn: build
     steps:
+    - task: DownloadPipelineArtifact@2
+      displayName: "Download Bin"
+      inputs:
+        source: current
+        artifact: build-bin
+        path: bin
+    - task: GoTool@0
+      displayName: "Set Go Version"
+      inputs:
+        version: "$(GOVERSION)"
     - bash: ./build/run-integration-tests.sh
       displayName: "Integration Test"

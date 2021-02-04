@@ -55,23 +55,23 @@ test-unit: build
 	$(GO) test ./...;	
 
 test-integration: build
-	export CURRENT_CONTEXT=$$(kubectl config current-context)
- 	kubectl config use-context $(KUBERNETES_CONTEXT)
-	$(GO) test -tags=integration ./tests/integration/...
-	if [[ ! -z $$CURRENT_CONTEXT ]]; then 
-		kubectl config use-context $$CURRENT_CONTEXT; 
+	export CURRENT_CONTEXT=$$(kubectl config current-context);
+	kubectl config use-context $(KUBERNETES_CONTEXT)
+	$(GO) test -tags=integration ./tests/integration/...;
+	if [[ ! -z $$CURRENT_CONTEXT ]]; then \
+		kubectl config use-context $$CURRENT_CONTEXT; \
 	fi
 
 test-in-kubernetes: build
 	export CURRENT_CONTEXT=$$(kubectl config current-context)
- 	kubectl config use-context $(KUBERNETES_CONTEXT)
+	kubectl config use-context $(KUBERNETES_CONTEXT)
 	kubectl apply -f tests/setup.yaml
 	docker build -f ./tests/Dockerfile -t localhost:5000/test:latest .
 	docker push localhost:5000/test:latest
 	kubectl run test-$$RANDOM --attach=true --image=localhost:5000/test:latest --restart=Never --serviceaccount=porter-plugin-test-sa -n porter-plugin-test-ns
 	kubectl delete -f tests/setup.yaml
-	if [[ ! -z $$CURRENT_CONTEXT ]]; then
-		kubectl config use-context $$CURRENT_CONTEXT
+	if [[ ! -z $$CURRENT_CONTEXT ]]; then \
+			kubectl config use-context $$CURRENT_CONTEXT; \
 	fi
 
 clean:
