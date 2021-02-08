@@ -59,7 +59,7 @@ test-integration: build bin/porter$(FILE_EXT) clean-last-testrun
 	mkdir -p ./bin/credentials
 	cp tests/integration/scripts/config.toml ./bin
 	cp tests/testdata/kubernetes-plugin-test.json ./bin/credentials/
-	cd tests/testdata && porter build
+	cd tests/testdata && ../../bin/porter build
 	kubectl config use-context $(KUBERNETES_CONTEXT)
 	kubectl create namespace $(TEST_NAMESPACE)  --dry-run=client -o yaml | kubectl apply -f -
 	kubectl create secret generic password --from-literal=credential=test --namespace $(TEST_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
