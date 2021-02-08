@@ -1,8 +1,8 @@
 PLUGIN = kubernetes
 PKG = get.porter.sh/plugin/$(PLUGIN)
-SHELL = bash
+SHELL = /bin/bash
 
-PORTER_HOME ?= $(HOME)/.porter
+PORTER_HOME = $(HOME)/.porter
 
 COMMIT ?= $(shell git rev-parse --short HEAD)
 VERSION ?= $(shell git describe --tags 2> /dev/null || echo v0)
@@ -14,6 +14,7 @@ LDFLAGS = -w -X $(PKG)/pkg.Version=$(VERSION) -X $(PKG)/pkg.Commit=$(COMMIT)
 XBUILD = CGO_ENABLED=0 $(GO) build -a -tags netgo -ldflags '$(LDFLAGS)'
 BINDIR = bin/plugins/$(PLUGIN)
 KUBERNETES_CONTEXT = docker-desktop
+TEST_NAMESPACE=porter-plugin-test-ns
 
 CLIENT_PLATFORM ?= $(shell go env GOOS)
 CLIENT_ARCH ?= $(shell go env GOARCH)
@@ -26,14 +27,14 @@ else
 FILE_EXT=
 endif
 
-debug: build-for-debug install
+debug: clean build-for-debug install
 
 build-for-debug:
 	mkdir -p $(BINDIR)
 	$(GO) build -o $(BINDIR)/$(PLUGIN)$(FILE_EXT) ./cmd/$(PLUGIN)
 
 .PHONY: build
-build:
+build: clean
 	mkdir -p $(BINDIR)
 	$(GO) build -ldflags '$(LDFLAGS)' -o $(BINDIR)/$(PLUGIN)$(FILE_EXT) ./cmd/$(PLUGIN)
 
@@ -53,26 +54,74 @@ test: test-unit test-integration test-in-kubernetes
 
 test-unit: build
 	$(GO) test ./...;	
-
-test-integration: build
-	export CURRENT_CONTEXT=$$(kubectl config current-context);
+test-integration: export CURRENT_CONTEXT=$(shell kubectl config current-context)
+test-integration: build bin/porter$(FILE_EXT) clean-last-testrun start-local-docker-registry
+	mkdir -p ./bin/credentials
+	cp tests/integration/scripts/config.toml ./bin
+	cp tests/testdata/kubernetes-plugin-test.json ./bin/credentials/
+	cd tests/testdata && porter publish
 	kubectl config use-context $(KUBERNETES_CONTEXT)
+	kubectl create namespace $(TEST_NAMESPACE)  --dry-run=client -o yaml | kubectl apply -f -
+	kubectl create secret generic password --from-literal=credential=test --namespace $(TEST_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	bin/porter -r localhost:5000/kubernetes-plugin-test:v1.0.0 install --cred kubernetes-plugin-test
+	if [[ $(shell bin/porter installations outputs show test_out -i kubernetes-plugin-test) != "test" ]]; then \
+		(exit 1) \
+	fi
 	$(GO) test -tags=integration ./tests/integration/...;
-	if [[ ! -z $$CURRENT_CONTEXT ]]; then \
+	kubectl delete namespace $(TEST_NAMESPACE)
+	if [[ $$CURRENT_CONTEXT ]]; then \
 		kubectl config use-context $$CURRENT_CONTEXT; \
 	fi
 
-test-in-kubernetes: build
-	export CURRENT_CONTEXT=$$(kubectl config current-context)
+test-in-kubernetes: export CURRENT_CONTEXT=$(shell kubectl config current-context)
+test-in-kubernetes: build clean-last-testrun
 	kubectl config use-context $(KUBERNETES_CONTEXT)
-	kubectl apply -f tests/setup.yaml
-	docker build -f ./tests/Dockerfile -t localhost:5000/test:latest .
+	kubectl apply -f ./tests/integration/scripts/setup.yaml
+	docker build -f ./tests/integration/scripts/Dockerfile -t localhost:5000/test:latest .
 	docker push localhost:5000/test:latest
-	kubectl run test-$$RANDOM --attach=true --image=localhost:5000/test:latest --restart=Never --serviceaccount=porter-plugin-test-sa -n porter-plugin-test-ns
-	kubectl delete -f tests/setup.yaml
-	if [[ ! -z $$CURRENT_CONTEXT ]]; then \
+	kubectl apply -f ./tests/integration/scripts/run-test-pod.yaml --namespace $(TEST_NAMESPACE)
+	kubectl wait --for=condition=ready pod/test --namespace $(TEST_NAMESPACE) 
+	kubectl create secret generic password --from-literal=credential=test --namespace $(TEST_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	kubectl exec --stdin --tty test -n $(TEST_NAMESPACE) -- go test -tags=integration ./tests/integration/...
+	kubectl exec --stdin --tty test -n  $(TEST_NAMESPACE) -- tests/integration/scripts/test-with-porter.sh
+	kubectl delete -f ./tests/integration/scripts/setup.yaml
+	if [[ $$CURRENT_CONTEXT ]]; then \
 			kubectl config use-context $$CURRENT_CONTEXT; \
 	fi
+
+publish: bin/porter$(FILE_EXT)
+	# AZURE_STORAGE_CONNECTION_STRING will be used for auth in the following commands
+	if [[ "$(PERMALINK)" == "latest" ]]; then \
+		az storage blob upload-batch -d porter/plugins/$(PLUGIN)/$(VERSION) -s $(BINDIR)/$(VERSION); \
+		az storage blob upload-batch -d porter/plugins/$(PLUGIN)/$(PERMALINK) -s $(BINDIR)/$(VERSION); \
+	else \
+		mv $(BINDIR)/$(VERSION) $(BINDIR)/$(PERMALINK); \
+		az storage blob upload-batch -d porter/plugins/$(PLUGIN)/$(PERMALINK) -s $(BINDIR)/$(PERMALINK); \
+	fi
+
+	# Generate the plugin feed
+	az storage blob download -c porter -n plugins/atom.xml -f bin/plugins/atom.xml
+	bin/porter mixins feed generate -d bin/plugins -f bin/plugins/atom.xml -t build/atom-template.xml
+	az storage blob upload -c porter -n plugins/atom.xml -f bin/plugins/atom.xml
+
+bin/porter$(FILE_EXT):
+	curl -fsSLo bin/porter$(FILE_EXT) https://cdn.porter.sh/canary/porter-$(CLIENT_PLATFORM)-$(CLIENT_ARCH)$(FILE_EXT)
+	chmod +x bin/porter$(FILE_EXT)
+
+install:
+	mkdir -p $(PORTER_HOME)/plugins/$(PLUGIN)
+	install $(BINDIR)/$(PLUGIN)$(FILE_EXT) $(PORTER_HOME)/plugins/$(PLUGIN)/$(PLUGIN)$(FILE_EXT)
+
+start-local-docker-registry:
+	@docker run -d -p 5000:5000 --name registry registry:2
+
+stop-local-docker-registry:
+	@if $$(docker inspect registry > /dev/null 2>&1); then \
+		docker rm -f registry ; \
+	fi
+
+clean-last-testrun: stop-local-docker-registry
+	-rm -fr testdata/.cnab
 
 clean:
 	-rm -fr bin/

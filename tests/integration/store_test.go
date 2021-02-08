@@ -26,6 +26,20 @@ var logger hclog.Logger = hclog.New(&hclog.LoggerOptions{
 	Output: os.Stderr,
 	Level:  hclog.Error})
 
+func Test_Default_Namespace(t *testing.T) {
+	k8sConfig := config.Config{}
+	store := secrets.NewStore(k8sConfig, logger)
+	t.Run("Test Default Namespace", func(t *testing.T) {
+		_, err := store.Resolve("secret", "test")
+		require.Error(t, err)
+		if runningInKubernetes() {
+			require.EqualError(t, err, "secrets \"test\" not found")
+		} else {
+			require.EqualError(t, err, "open /var/run/secrets/kubernetes.io/serviceaccount/namespace: no such file or directory")
+		}
+	})
+}
+
 func Test_Namespace_Does_Not_Exist(t *testing.T) {
 	namespace := tests.GenerateNamespaceName()
 	k8sConfig := config.Config{
@@ -118,4 +132,8 @@ func createSecret(t *testing.T, nsName string, name string, value string) {
 	secret := &v1.Secret{ObjectMeta: metav1.ObjectMeta{Name: name}, Data: data}
 	_, err = clientSet.CoreV1().Secrets(nsName).Create(secret)
 	require.NoError(t, err)
+}
+
+func runningInKubernetes() bool {
+	return len(os.Getenv("KUBERNETES_SERVICE_HOST")) > 0
 }

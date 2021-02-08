@@ -10,3 +10,10 @@ spec:
   containers:
   - name: test
     image: localhost:5000/test:latest
+    volumeMounts:
+    - name: dockersocket
+      mountPath: "/var/run/docker.sock"
+  volumes:
+  - name: dockersocket
+    hostPath:
+      path: /var/run/docker.sock

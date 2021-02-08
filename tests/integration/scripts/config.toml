@@ -1,0 +1,8 @@
+default-secrets = "kubernetes"
+
+[[secrets]]
+name = "kubernetes"
+plugin = "kubernetes.secret"
+
+[secrets.config]
+namespace = "porter-plugin-test-ns"

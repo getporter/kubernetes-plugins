@@ -60,29 +60,23 @@ func (s *Store) Connect() error {
 
 	var err error
 	var config *restclient.Config
+	var kubeconfigfile string
 
-	// If there is a kubeconfig in config use it
-	if s.config.Kubeconfig != "" {
-		config, err = clientcmd.RESTConfigFromKubeConfig([]byte(s.config.Kubeconfig))
-	} else {
-		// otherwise check for KUBECONFIG or ~/.kube/config
-		var kubeconfigfile string
-		if kubeconfigfile = os.Getenv("KUBECONFIG"); kubeconfigfile == "" {
-			kubeconfigfile = filepath.Join(os.Getenv("HOME"), ".kube", "config")
-		}
-		if _, err = os.Stat(kubeconfigfile); err != nil {
-			if os.IsNotExist(err) {
-				// If the kubeconfig file does not exist then try in cluster config
-				s.logger.Error("Kubernetes client config file does not exist", "file", kubeconfigfile)
-				config, err = clientcmd.BuildConfigFromFlags("", "")
-			} else {
-				s.logger.Error("Failed to stat Kubernetes client config file", "file", kubeconfigfile, "error", err)
-				return err
-			}
+	if kubeconfigfile = os.Getenv("KUBECONFIG"); kubeconfigfile == "" {
+		kubeconfigfile = filepath.Join(os.Getenv("HOME"), ".kube", "config")
+	}
+	if _, err = os.Stat(kubeconfigfile); err != nil {
+		if os.IsNotExist(err) {
+			// If the kubeconfig file does not exist then try in cluster config
+			s.logger.Error("Kubernetes client config file does not exist", "file", kubeconfigfile)
+			config, err = clientcmd.BuildConfigFromFlags("", "")
 		} else {
-			s.logger.Info("Using Kubeconfig", "file", kubeconfigfile)
-			config, err = clientcmd.BuildConfigFromFlags("", kubeconfigfile)
+			s.logger.Error("Failed to stat Kubernetes client config file", "file", kubeconfigfile, "error", err)
+			return err
 		}
+	} else {
+		s.logger.Info("Using Kubeconfig", "file", kubeconfigfile)
+		config, err = clientcmd.BuildConfigFromFlags("", kubeconfigfile)
 	}
 
 	if err != nil {
