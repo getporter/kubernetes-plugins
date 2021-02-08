@@ -55,11 +55,11 @@ test: test-unit test-integration test-in-kubernetes
 test-unit: build
 	$(GO) test ./...;	
 test-integration: export CURRENT_CONTEXT=$(shell kubectl config current-context)
-test-integration: build bin/porter$(FILE_EXT) clean-last-testrun start-local-docker-registry
+test-integration: build bin/porter$(FILE_EXT) clean-last-testrun
 	mkdir -p ./bin/credentials
 	cp tests/integration/scripts/config.toml ./bin
 	cp tests/testdata/kubernetes-plugin-test.json ./bin/credentials/
-	cd tests/testdata && porter publish
+	cd tests/testdata && porter build
 	kubectl config use-context $(KUBERNETES_CONTEXT)
 	kubectl create namespace $(TEST_NAMESPACE)  --dry-run=client -o yaml | kubectl apply -f -
 	kubectl create secret generic password --from-literal=credential=test --namespace $(TEST_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
@@ -112,15 +112,7 @@ install:
 	mkdir -p $(PORTER_HOME)/plugins/$(PLUGIN)
 	install $(BINDIR)/$(PLUGIN)$(FILE_EXT) $(PORTER_HOME)/plugins/$(PLUGIN)/$(PLUGIN)$(FILE_EXT)
 
-start-local-docker-registry:
-	@docker run -d -p 5000:5000 --name registry registry:2
-
-stop-local-docker-registry:
-	@if $$(docker inspect registry > /dev/null 2>&1); then \
-		docker rm -f registry ; \
-	fi
-
-clean-last-testrun: stop-local-docker-registry
+clean-last-testrun: 
 	-rm -fr testdata/.cnab
 
 clean:
