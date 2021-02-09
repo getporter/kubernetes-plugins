@@ -83,7 +83,7 @@ test-in-kubernetes: build clean-last-testrun
 	docker build -f ./tests/integration/scripts/Dockerfile -t localhost:5000/test:latest .
 	docker push localhost:5000/test:latest
 	kubectl apply -f ./tests/integration/scripts/run-test-pod.yaml --namespace $(TEST_NAMESPACE)
-	kubectl wait --for=condition=ready pod/test --namespace $(TEST_NAMESPACE) 
+	kubectl wait --timeout=120s --for=condition=ready pod/test --namespace $(TEST_NAMESPACE) 
 	kubectl create secret generic password --from-literal=credential=test --namespace $(TEST_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	kubectl exec --stdin --tty test -n $(TEST_NAMESPACE) -- go test -tags=integration ./tests/integration/...
 	kubectl exec --stdin --tty test -n  $(TEST_NAMESPACE) -- tests/integration/scripts/test-with-porter.sh
