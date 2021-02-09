@@ -55,21 +55,18 @@ test: test-unit test-integration test-in-kubernetes
 test-unit: build
 	$(GO) test ./...;	
 test-integration: export CURRENT_CONTEXT=$(shell kubectl config current-context)
+test-integration: export PORTER_HOME=$(shell echo $$PWD/bin)
 test-integration: build bin/porter$(FILE_EXT) clean-last-testrun
-	mkdir -p ./bin/credentials
-	cp tests/integration/scripts/config.toml ./bin
-	cp tests/testdata/kubernetes-plugin-test.json ./bin/credentials/
-	if [[ ! -f $(PORTER_HOME)/runtimes/porter-runtime ]]; then \
-		mkdir -p $(PORTER_HOME)/runtimes; \
-		cp bin/porter $(PORTER_HOME)/runtimes/porter-runtime; \
-	fi
-		if [[ ! -f $(PORTER_HOME)/mixinx/exec ]]; then \
-		./bin/porter mixin install exec; \
-	fi
+	mkdir -p $(PORTER_HOME)/credentials
+	cp tests/integration/scripts/config.toml $(PORTER_HOME)
+	cp tests/testdata/kubernetes-plugin-test.json $(PORTER_HOME)/credentials/
+	mkdir -p $(PORTER_HOME)/runtimes
+	cp bin/porter $(PORTER_HOME)/runtimes/porter-runtime
+	./bin/porter mixin install exec
 	kubectl config use-context $(KUBERNETES_CONTEXT)
 	kubectl create namespace $(TEST_NAMESPACE)  --dry-run=client -o yaml | kubectl apply -f -
 	kubectl create secret generic password --from-literal=credential=test --namespace $(TEST_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	cd tests/testdata && ../../bin/porter install --cred kubernetes-plugin-test
+	cd tests/testdata && ../../bin/porter storage migrate && ../../bin/porter install --cred kubernetes-plugin-test
 	if [[ $(shell bin/porter installations outputs show test_out -i kubernetes-plugin-test) != "test" ]]; then \
 		(exit 1) \
 	fi
