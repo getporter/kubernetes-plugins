@@ -81,6 +81,7 @@ test-in-kubernetes: build clean-last-testrun
 	kubectl config use-context $(KUBERNETES_CONTEXT)
 	kubectl apply -f ./tests/integration/scripts/setup.yaml
 	docker build -f ./tests/integration/scripts/Dockerfile -t localhost:5000/test:latest .
+	kubectl wait --timeout=120s --for=condition=ready pod/docker-registry --namespace $(TEST_NAMESPACE) 
 	docker push localhost:5000/test:latest
 	kubectl apply -f ./tests/integration/scripts/run-test-pod.yaml --namespace $(TEST_NAMESPACE)
 	kubectl wait --timeout=120s --for=condition=ready pod/test --namespace $(TEST_NAMESPACE) 

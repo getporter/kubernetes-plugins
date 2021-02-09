@@ -38,6 +38,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: docker-registry
+  namespace: porter-plugin-test-ns
   labels:
     app: registry
 spec:
