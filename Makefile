@@ -60,7 +60,8 @@ test-integration: build bin/porter$(FILE_EXT) clean-last-testrun
 	cp tests/integration/scripts/config.toml ./bin
 	cp tests/testdata/kubernetes-plugin-test.json ./bin/credentials/
 	if [[ ! -f $(PORTER_HOME)/runtimes/porter-runtime ]]; then \
-		 cp bin/porter $(PORTER_HOME)/runtimes/porter-runtime; \
+		mkdir -p $(PORTER_HOME)/runtimes; \
+		cp bin/porter $(PORTER_HOME)/runtimes/porter-runtime; \
 	fi
 		if [[ ! -f $(PORTER_HOME)/mixinx/exec ]]; then \
 		./bin/porter mixin install exec; \
