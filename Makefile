@@ -27,7 +27,7 @@ else
 FILE_EXT=
 endif
 
-debug: clean build-for-debug install
+debug: clean build-for-debug  bin/porter$(FILE_EXT)
 
 build-for-debug:
 	mkdir -p $(BINDIR)
@@ -105,13 +105,13 @@ publish: bin/porter$(FILE_EXT)
 
 bin/porter$(FILE_EXT): export PORTER_HOME=$(shell echo $$PWD/bin)
 bin/porter$(FILE_EXT): 
-	curl --http1.1 -lvfsSLo bin/porter$(FILE_EXT) https://cdn.porter.sh/v0.33.0/porter-$(CLIENT_PLATFORM)-$(CLIENT_ARCH)$(FILE_EXT)
+	curl --http1.1 -lvfsSLo bin/porter$(FILE_EXT) https://cdn.porter.sh/latest/porter-$(CLIENT_PLATFORM)-$(CLIENT_ARCH)$(FILE_EXT)
 	chmod +x bin/porter$(FILE_EXT)
-	mkdir -p $(PORTER_HOME)/credentials
-	cp tests/integration/scripts/config.toml $(PORTER_HOME)
-	cp tests/testdata/kubernetes-plugin-test.json $(PORTER_HOME)/credentials/
-	mkdir -p $(PORTER_HOME)/runtimes
-	cp bin/porter $(PORTER_HOME)/runtimes/porter-runtime
+	mkdir -p $$PORTER_HOME/credentials
+	cp tests/integration/scripts/config.toml $$PORTER_HOME
+	cp tests/testdata/kubernetes-plugin-test.json $$PORTER_HOME/credentials/
+	mkdir -p $$PORTER_HOME/runtimes
+	cp bin/porter $$PORTER_HOME/runtimes/porter-runtime
 	./bin/porter mixin install exec
 
 install:
