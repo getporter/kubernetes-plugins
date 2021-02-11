@@ -57,6 +57,7 @@ test-unit: build
 test-integration: export CURRENT_CONTEXT=$(shell kubectl config current-context)
 test-integration: export PORTER_HOME=$(shell echo $${PWD}/bin)
 test-integration: build bin/porter$(FILE_EXT) clean-last-testrun
+	echo PORTER_HOME:$$PORTER_HOME
 	kubectl config use-context $(KUBERNETES_CONTEXT)
 	kubectl create namespace $(TEST_NAMESPACE)  --dry-run=client -o yaml | kubectl apply -f -
 	kubectl create secret generic password --from-literal=credential=test --namespace $(TEST_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
