@@ -2,3 +2,4 @@
 .DS_Store
 kind.config.yaml
 **/.cnab/**
+/tests/testdata/Dockerfile
