@@ -6,7 +6,6 @@ RUN     mkdir -p /root/.porter/plugins/kubernetes  &&\
 COPY / /app
 RUN install /app/bin/plugins/kubernetes/kubernetes /root/.porter/plugins/kubernetes/kubernetes
 WORKDIR /app
-COPY ./tests/testdata/porter.yaml .
 COPY ./tests/integration/scripts/config.toml /root/.porter
 COPY ./tests/testdata/kubernetes-plugin-test.json /root/.porter/credentials/.
 ENTRYPOINT ["tail","-f","/dev/null"]

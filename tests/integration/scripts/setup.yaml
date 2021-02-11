@@ -34,6 +34,33 @@ roleRef:
   name: porter-plugin-test-cr
   apiGroup: rbac.authorization.k8s.io
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: porter-plugin-test-r
+  namespace: porter-plugin-test-ns
+rules:
+- apiGroups: ["batch", "extensions"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["*"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: porter-plugin-test-rb
+  namespace: porter-plugin-test-ns
+subjects:
+- kind: ServiceAccount
+  name: porter-plugin-test-sa
+  namespace: porter-plugin-test-ns
+roleRef:
+  kind: Role
+  name: porter-plugin-test-r
+  apiGroup: rbac.authorization.k8s.io
+---
 apiVersion: v1
 kind: Pod
 metadata:
@@ -49,3 +76,45 @@ spec:
     - containerPort: 5000
       hostPort: 5000
       protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  namespace: porter-plugin-test-ns
+spec:
+  selector:
+    app: registry
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cnab-driver-volume
+  namespace: porter-plugin-test-ns
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /tmp/cnab
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cnab-driver-share
+  namespace: porter-plugin-test-ns
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi

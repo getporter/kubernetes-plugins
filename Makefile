@@ -55,14 +55,7 @@ test: test-unit test-integration test-in-kubernetes
 test-unit: build
 	$(GO) test ./...;	
 test-integration: export CURRENT_CONTEXT=$(shell kubectl config current-context)
-test-integration: export PORTER_HOME=$(shell echo $$PWD/bin)
 test-integration: build bin/porter$(FILE_EXT) clean-last-testrun
-	mkdir -p $(PORTER_HOME)/credentials
-	cp tests/integration/scripts/config.toml $(PORTER_HOME)
-	cp tests/testdata/kubernetes-plugin-test.json $(PORTER_HOME)/credentials/
-	mkdir -p $(PORTER_HOME)/runtimes
-	cp bin/porter $(PORTER_HOME)/runtimes/porter-runtime
-	./bin/porter mixin install exec
 	kubectl config use-context $(KUBERNETES_CONTEXT)
 	kubectl create namespace $(TEST_NAMESPACE)  --dry-run=client -o yaml | kubectl apply -f -
 	kubectl create secret generic password --from-literal=credential=test --namespace $(TEST_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
@@ -77,14 +70,16 @@ test-integration: build bin/porter$(FILE_EXT) clean-last-testrun
 	fi
 
 test-in-kubernetes: export CURRENT_CONTEXT=$(shell kubectl config current-context)
-test-in-kubernetes: build clean-last-testrun
+test-in-kubernetes: build bin/porter$(FILE_EXT) clean-last-testrun
 	kubectl config use-context $(KUBERNETES_CONTEXT)
 	kubectl apply -f ./tests/integration/scripts/setup.yaml
-	docker build -f ./tests/integration/scripts/Dockerfile -t localhost:5000/test:latest .
 	kubectl wait --timeout=120s --for=condition=ready pod/docker-registry --namespace $(TEST_NAMESPACE) 
+	cd tests/testdata && ../../bin/porter publish 
+	docker build -f ./tests/integration/scripts/Dockerfile -t localhost:5000/test:latest .
 	docker push localhost:5000/test:latest
 	kubectl apply -f ./tests/integration/scripts/run-test-pod.yaml --namespace $(TEST_NAMESPACE)
 	kubectl wait --timeout=120s --for=condition=ready pod/test --namespace $(TEST_NAMESPACE) 
+	cd tests/testdata && ../../bin/porter publish 
 	kubectl create secret generic password --from-literal=credential=test --namespace $(TEST_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	kubectl exec --stdin --tty test -n $(TEST_NAMESPACE) -- go test -tags=integration ./tests/integration/...
 	kubectl exec --stdin --tty test -n  $(TEST_NAMESPACE) -- tests/integration/scripts/test-with-porter.sh
@@ -108,9 +103,16 @@ publish: bin/porter$(FILE_EXT)
 	bin/porter mixins feed generate -d bin/plugins -f bin/plugins/atom.xml -t build/atom-template.xml
 	az storage blob upload -c porter -n plugins/atom.xml -f bin/plugins/atom.xml
 
-bin/porter$(FILE_EXT):
-	curl --http1.1 -lvfsSLo bin/porter$(FILE_EXT) https://cdn.porter.sh/canary/porter-$(CLIENT_PLATFORM)-$(CLIENT_ARCH)$(FILE_EXT)
+bin/porter$(FILE_EXT): export PORTER_HOME=$(shell echo $$PWD/bin)
+bin/porter$(FILE_EXT): 
+	curl --http1.1 -lvfsSLo bin/porter$(FILE_EXT) https://cdn.porter.sh/v0.33.0/porter-$(CLIENT_PLATFORM)-$(CLIENT_ARCH)$(FILE_EXT)
 	chmod +x bin/porter$(FILE_EXT)
+	mkdir -p $(PORTER_HOME)/credentials
+	cp tests/integration/scripts/config.toml $(PORTER_HOME)
+	cp tests/testdata/kubernetes-plugin-test.json $(PORTER_HOME)/credentials/
+	mkdir -p $(PORTER_HOME)/runtimes
+	cp bin/porter $(PORTER_HOME)/runtimes/porter-runtime
+	./bin/porter mixin install exec
 
 install:
 	mkdir -p $(PORTER_HOME)/plugins/$(PLUGIN)

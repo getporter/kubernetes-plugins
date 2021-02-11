@@ -10,15 +10,10 @@ spec:
   containers:
   - name: test
     image: localhost:5000/test:latest
-    securityContext:
-      privileged: true
-      runAsUser: 0
     volumeMounts:
-    - name: dockersocket
-      mountPath: /var/run/docker.sock
-      readOnly: false
+    - mountPath: "/driverio"
+      name: cnab-shared-storage
   volumes:
-  - name: dockersocket
-    hostPath:
-      path: /var/run/docker.sock
-      type: Socket
+  - name: cnab-shared-storage
+    persistentVolumeClaim:
+      claimName: cnab-driver-share
