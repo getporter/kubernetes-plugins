@@ -8,7 +8,7 @@
       "type": "process",
       "command": "make",
       "args": [
-        "debug"
+        "debug-in-vscode"
       ],
       "presentation": {
         "reveal": "always",
@@ -22,7 +22,7 @@
       "command": "./.vscode/scripts/runporterinbackground.sh",
       "options": {
         "env": {
-          "PORTER_RUN_PLUGIN_IN_DEBUGGER": "kubernetes.secret",
+          "PORTER_RUN_PLUGIN_IN_DEBUGGER": "storage.kubernetes.storage",
           "PORTER_PLUGIN_WORKING_DIRECTORY": "${workspaceRoot}/cmd/kubernetes",
           "PORTER_DEBUGGER_PORT": "2345",
           "PORTER_HOME": "/home/${env:USER}/.porter",
@@ -32,7 +32,7 @@
         "reveal": "always",
         "panel": "shared"
       },
-      "args": ["list","--debug"]
+      "args": ["storage","migrate","--debug","--debug-plugins"],
     },
     {
       "label": "KillDebugProcesses",

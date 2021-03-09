@@ -37,14 +37,8 @@ nodes:
 EOF
 
 # Check for WSL2
-if [[ $WSL_INTEROP ]]
+if [[ -z $WSL_INTEROP ]]
 then
-cat << EOF >> ${KIND_CONFIG_FILE_NAME}
-  - containerPort: 30000
-    hostPort: 30000
-    protocol: TCP
-EOF
-else
 cat << EOF >> ${KIND_CONFIG_FILE_NAME}
 networking:
   apiServerAddress: "${CURRENT_HOST_IP}"

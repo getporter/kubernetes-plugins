@@ -1,20 +1,18 @@
 package secrets
 
 import (
-	"io/ioutil"
-	"os"
-	"path/filepath"
+	"context"
+	"fmt"
 	"strings"
 
 	"get.porter.sh/plugin/kubernetes/pkg/kubernetes/config"
+	k8s "get.porter.sh/plugin/kubernetes/pkg/kubernetes/helper"
 	portersecrets "get.porter.sh/porter/pkg/secrets"
 	cnabsecrets "github.com/cnabio/cnab-go/secrets"
 	"github.com/cnabio/cnab-go/secrets/host"
 	"github.com/hashicorp/go-hclog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	restclient "k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 var _ cnabsecrets.Store = &Store{}
@@ -48,53 +46,15 @@ func (s *Store) Connect() error {
 		return nil
 	}
 
-	if s.config.Namespace == "" {
-		// Try to get the namespace of current pod
-		if ns, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace"); err != nil {
-			s.logger.Error("Failed to lookup Kubernetes namespace", "error", err)
-			return err
-		} else {
-			s.config.Namespace = string(ns)
-		}
-	}
-
-	var err error
-	var config *restclient.Config
-	var kubeconfigfile string
-
-	if kubeconfigfile = os.Getenv("KUBECONFIG"); kubeconfigfile == "" {
-		kubeconfigfile = filepath.Join(os.Getenv("HOME"), ".kube", "config")
-	}
-	if _, err = os.Stat(kubeconfigfile); err != nil {
-		if os.IsNotExist(err) {
-			// If the kubeconfig file does not exist then try in cluster config
-			s.logger.Error("Kubernetes client config file does not exist", "file", kubeconfigfile)
-			config, err = clientcmd.BuildConfigFromFlags("", "")
-		} else {
-			s.logger.Error("Failed to stat Kubernetes client config file", "file", kubeconfigfile, "error", err)
-			return err
-		}
-	} else {
-		s.logger.Info("Using Kubeconfig", "file", kubeconfigfile)
-		config, err = clientcmd.BuildConfigFromFlags("", kubeconfigfile)
-	}
+	clientSet, namespace, err := k8s.GetClientSet(s.config.Namespace, s.logger)
 
 	if err != nil {
-		s.logger.Error("Failed to get Kubernetes client config", "error", err)
+		s.logger.Debug(fmt.Sprintf("Failed to get Kubernetes Client Set: %v", err))
 		return err
 	}
 
-	s.clientSet, err = kubernetes.NewForConfig(config)
-
-	if err != nil {
-		s.logger.Error("Failed to get Kubernetes clientset", "error", err)
-		return err
-	}
-
-	if _, err := s.clientSet.CoreV1().Namespaces().Get(s.config.Namespace, metav1.GetOptions{}); err != nil {
-		s.logger.Error("Failed to validate Kubernetes namespace", "error", err)
-		return err
-	}
+	s.clientSet = clientSet
+	s.config.Namespace = *namespace
 
 	return nil
 }
@@ -106,8 +66,10 @@ func (s *Store) Resolve(keyName string, keyValue string) (string, error) {
 
 	key := strings.ToLower(keyValue)
 
-	secret, err := s.clientSet.CoreV1().Secrets(s.config.Namespace).Get(key, metav1.GetOptions{})
+	s.logger.Debug(fmt.Sprintf("Looking for key:%s", keyValue))
+	secret, err := s.clientSet.CoreV1().Secrets(s.config.Namespace).Get(context.Background(), key, metav1.GetOptions{})
 	if err != nil {
+		s.logger.Debug(fmt.Sprintf("Failed to Read secrets for key:%s %v", keyValue, err))
 		return "", err
 	}
 
