@@ -1,0 +1,45 @@
+name: kubernetes-plugin-test
+version: 1.0.0
+description: Test Bundle for kubernetes plugin
+registry: localhost:5000
+
+credentials:
+- name: test
+  env: TEST_PASSWORD
+
+mixins:
+- exec
+
+install:
+- exec:
+    description: Echo credentials
+    command: bash
+    flags:
+      c: "'echo {{ bundle.credentials.test }} >  /tmp/test_out'"
+    outputs:
+      - name: test_out
+        path: /tmp/test_out
+
+upgrade:
+- exec:
+    description: Echo credentials
+    command: bash
+    flags:
+      c: "'echo {{ bundle.credentials.test }} >  /tmp/test_out'"
+    outputs:
+      - name: test_out
+        path: /tmp/test_out
+
+uninstall:
+-  exec:
+    description: Echo credentials
+    command: bash
+    flags:
+      c: "'echo {{ bundle.credentials.test }} >  /tmp/test_out'"
+    outputs:
+      - name: test_out
+        path: /tmp/test_out
+
+outputs:
+  - name: test_out
+    type: string

@@ -1,0 +1,10 @@
+default-secrets = "kubernetes-secrets"
+default-storage = "kubernetes-storage"
+
+[[secrets]]
+name = "kubernetes-secrets"
+plugin = "kubernetes.secret"
+
+[[storage]]
+name = "kubernetes-storage"
+plugin = "kubernetes.storage"

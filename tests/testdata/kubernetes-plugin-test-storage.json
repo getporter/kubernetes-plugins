@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0.0-DRAFT+b6c701f",
+  "name": "kubernetes-plugin-test",
+  "created": "2021-03-08T13:13:03.1743821Z",
+  "modified": "2021-03-08T13:13:03.1743821Z",
+  "credentials": [
+    {
+      "name": "test",
+      "source": {
+        "value": "test"
+      }
+    }
+  ]
+}
