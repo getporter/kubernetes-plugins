@@ -1,0 +1,26 @@
+trigger:
+  branches:
+    include:
+      - refs/heads/main
+  tags:
+    include:
+    - v*
+pr: none
+
+pool:
+  vmImage: 'Ubuntu 18.04'
+
+variables:
+  GOVERSION: "1.14.6"
+
+steps:
+  - template: build-and-test.yml
+  - script: |
+      make xbuild-all 
+    workingDirectory: '$(System.DefaultWorkingDirectory)'
+    displayName: 'Build Release'
+  - script: |
+      export AZURE_STORAGE_CONNECTION_STRING="$(AZURE_STORAGE_CONNECTION_STRING)"
+      make publish 
+    workingDirectory: '$(System.DefaultWorkingDirectory)'
+    displayName: 'Publish'

@@ -60,7 +60,7 @@ test-unit: build
 	$(GO) test ./...;	
 test-integration: export CURRENT_CONTEXT=$(shell kubectl config current-context)
 test-integration: export PORTER_HOME=$(shell echo $${PWD}/bin)
-test-integration: build bin/porter$(FILE_EXT) clean-last-testrun
+test-integration: build bin/porter$(FILE_EXT) setup-tests clean-last-testrun
 	kubectl config use-context $(KUBERNETES_CONTEXT)
 	kubectl create namespace $(TEST_NAMESPACE)  --dry-run=client -o yaml | kubectl apply -f -
 	kubectl create secret generic password --from-literal=credential=test --namespace $(TEST_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
@@ -82,7 +82,7 @@ test-integration: build bin/porter$(FILE_EXT) clean-last-testrun
 
 test-in-kubernetes: export CURRENT_CONTEXT=$(shell kubectl config current-context)
 test-in-kubernetes: export PORTER_HOME=$(shell echo $${PWD}/bin)
-test-in-kubernetes: build bin/porter$(FILE_EXT) clean-last-testrun
+test-in-kubernetes: build bin/porter$(FILE_EXT) setup-tests clean-last-testrun
 	kubectl config use-context $(KUBERNETES_CONTEXT)
 	kubectl apply -f ./tests/integration/scripts/setup.yaml
 	kubectl wait --timeout=$(TIMEOUT) --for=condition=ready pod/docker-registry --namespace $(TEST_NAMESPACE) 
@@ -119,6 +119,8 @@ bin/porter$(FILE_EXT): export PORTER_HOME=$(shell echo $${PWD}/bin)
 bin/porter$(FILE_EXT): 
 	curl --http1.1 -lvfsSLo bin/porter$(FILE_EXT) https://cdn.porter.sh/latest/porter-$(CLIENT_PLATFORM)-$(CLIENT_ARCH)$(FILE_EXT)
 	chmod +x bin/porter$(FILE_EXT)
+
+setup-tests:
 	mkdir -p $$PORTER_HOME/credentials
 	cp tests/integration/scripts/config-*.toml $$PORTER_HOME
 	cp tests/testdata/kubernetes-plugin-test-*.json $$PORTER_HOME/credentials
