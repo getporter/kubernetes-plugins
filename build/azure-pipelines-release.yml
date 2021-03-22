@@ -12,6 +12,7 @@ pool:
 
 variables:
   GOVERSION: "1.14.6"
+  group: production
 
 steps:
   - template: build-and-test.yml
