@@ -12,10 +12,11 @@ variables:
 
 steps:
   - template: build-and-test.yml
-  - script: |
-      make xbuild-all 
+  
+  - script: make xbuild-all 
     workingDirectory: '$(System.DefaultWorkingDirectory)'
     displayName: 'Build Release'
+    
   - task: GitHubRelease@0
     inputs:
       gitHubConnection: $(GITHUB_CONNECTIONNAME)
