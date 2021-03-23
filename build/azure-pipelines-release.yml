@@ -15,7 +15,7 @@ variables:
   tag: $[replace(variables['Build.SourceBranch'],'refs/tags/','')]
 
 steps:
-  - template: build-and-test.yml
+#  - template: build-and-test.yml
   
   - script: make xbuild-all 
     workingDirectory: '$(System.DefaultWorkingDirectory)'
