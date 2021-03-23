@@ -12,6 +12,7 @@ pool:
 
 variables:
   GOVERSION: "1.14.6"
+  tag: $[replace(variables['Build.SourceBranch'],'refs/tags/','')]
 
 steps:
 #  - template: build-and-test.yml
@@ -20,8 +21,19 @@ steps:
     workingDirectory: '$(System.DefaultWorkingDirectory)'
     displayName: 'Build Release'
 
-  - script: make publish
-    env: 
-      AZURE_STORAGE_CONNECTION_STRING: $(AZURE_STORAGE_CONNECTION_STRING)
+  - script: | 
+      export AZURE_STORAGE_CONNECTION_STRING=$(AZURE_STORAGE_CONNECTION_STRING)
+      make publish
     workingDirectory: '$(System.DefaultWorkingDirectory)'
     displayName: 'Publish'
+
+  - task: GitHubRelease@0
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+    inputs:
+      gitHubConnection: $(GITHUB_CONNECTIONNAME)
+      repositoryName: '$(Build.Repository.Name)' 
+      action: 'create' 
+      tagSource: 'auto'
+      assets: '$(System.DefaultWorkingDirectory)/bin/plugins/kubernetes/$(tag)/**'
+      addChangeLog: true 
+      compareWith: 'lastFullRelease'
