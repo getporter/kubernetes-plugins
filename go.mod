@@ -6,7 +6,7 @@ replace github.com/hashicorp/go-plugin => github.com/carolynvs/go-plugin v1.0.1-
 
 require (
 	get.porter.sh/porter v0.31.2
-	github.com/cnabio/cnab-go v0.15.0
+	github.com/cnabio/cnab-go v0.18.0
 	github.com/hashicorp/go-hclog v0.14.1
 	github.com/hashicorp/go-plugin v1.4.0
 	github.com/pkg/errors v0.9.1

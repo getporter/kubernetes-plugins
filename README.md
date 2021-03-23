@@ -2,6 +2,8 @@
 
 This is a set of Kubernetes plugins for [Porter](https://github.com/getporter/porter).
 
+[![Build Status](https://dev.azure.com/getporter/porter/_apis/build/status/kubernetes-plugins-release?branchName=main)](https://dev.azure.com/getporter/porter/_build/latest?definitionId=23&branchName=main)
+
 ## Installation
 
 The plugin is distributed as a single binary, `kubernetes`. The following snippet will clone this repository, build the binary

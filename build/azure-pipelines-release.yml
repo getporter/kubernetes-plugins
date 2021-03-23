@@ -15,12 +15,13 @@ variables:
 
 steps:
   - template: build-and-test.yml
-  - script: |
-      make xbuild-all 
+  
+  - script: make xbuild-all 
     workingDirectory: '$(System.DefaultWorkingDirectory)'
     displayName: 'Build Release'
-  - script: |
-      export AZURE_STORAGE_CONNECTION_STRING="$(AZURE_STORAGE_CONNECTION_STRING)"
-      make publish 
+
+  - script: make publish
+    env: 
+      AZURE_STORAGE_CONNECTION_STRING: $(AZURE_STORAGE_CONNECTION_STRING)
     workingDirectory: '$(System.DefaultWorkingDirectory)'
     displayName: 'Publish'
