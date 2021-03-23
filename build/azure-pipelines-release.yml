@@ -14,7 +14,7 @@ variables:
   GOVERSION: "1.14.6"
 
 steps:
-  - template: build-and-test.yml
+#  - template: build-and-test.yml
   
   - script: make xbuild-all 
     workingDirectory: '$(System.DefaultWorkingDirectory)'
@@ -22,6 +22,6 @@ steps:
 
   - script: make publish
     env: 
-      AZURE_STORAGE_CONNECTION_STRING: $(AZURE_STORAGE_CONNECTION_STRING)
+      AZURE_STORAGE_CONNECTION_STRING: '$(AZURE_STORAGE_CONNECTION_STRING)'
     workingDirectory: '$(System.DefaultWorkingDirectory)'
     displayName: 'Publish'
