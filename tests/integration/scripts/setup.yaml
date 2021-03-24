@@ -46,6 +46,9 @@ rules:
 - apiGroups: [""]
   resources: ["pods"]
   verbs: ["*"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["*"]
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
