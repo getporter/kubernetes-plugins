@@ -21,19 +21,9 @@ steps:
     workingDirectory: '$(System.DefaultWorkingDirectory)'
     displayName: 'Build Release'
 
-  - script: | 
-      export AZURE_STORAGE_CONNECTION_STRING=$(AZURE_STORAGE_CONNECTION_STRING)
+  - script: |
       make publish
+    env:
+      GITHUB_TOKEN: $(GITHUB_TOKEN)
     workingDirectory: '$(System.DefaultWorkingDirectory)'
     displayName: 'Publish'
-
-  - task: GitHubRelease@0
-    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
-    inputs:
-      gitHubConnection: $(GITHUB_CONNECTIONNAME)
-      repositoryName: '$(Build.Repository.Name)' 
-      action: 'create' 
-      tagSource: 'auto'
-      assets: '$(System.DefaultWorkingDirectory)/bin/plugins/kubernetes/$(tag)/**'
-      addChangeLog: true 
-      compareWith: 'lastFullRelease'

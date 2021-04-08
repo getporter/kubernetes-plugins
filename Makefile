@@ -101,19 +101,7 @@ test-in-kubernetes: build bin/porter$(FILE_EXT) setup-tests clean-last-testrun
 	fi
 
 publish: bin/porter$(FILE_EXT)
-	# AZURE_STORAGE_CONNECTION_STRING will be used for auth in the following commands
-	if [[ "$(PERMALINK)" == "latest" ]]; then \
-		az storage blob upload-batch -d porter/plugins/$(PLUGIN)/$(VERSION) -s $(BINDIR)/$(VERSION); \
-		az storage blob upload-batch -d porter/plugins/$(PLUGIN)/$(PERMALINK) -s $(BINDIR)/$(VERSION); \
-	else \
-		mv $(BINDIR)/$(VERSION) $(BINDIR)/$(PERMALINK); \
-		az storage blob upload-batch -d porter/plugins/$(PLUGIN)/$(PERMALINK) -s $(BINDIR)/$(PERMALINK); \
-	fi
-
-	# Generate the plugin feed
-	az storage blob download -c porter -n plugins/atom.xml -f bin/plugins/atom.xml
-	bin/porter mixins feed generate -d bin/plugins -f bin/plugins/atom.xml -t build/atom-template.xml
-	az storage blob upload -c porter -n plugins/atom.xml -f bin/plugins/atom.xml --content-cache-control max-age=300
+	go run mage.go -v Publish $(PLUGIN) $(VERSION) $(PERMALINK)
 
 bin/porter$(FILE_EXT): export PORTER_HOME=$(shell echo $${PWD}/bin)
 bin/porter$(FILE_EXT): 
