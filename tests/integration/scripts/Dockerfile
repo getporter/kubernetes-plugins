@@ -1,5 +1,5 @@
 FROM golang
-RUN curl https://cdn.porter.sh/latest/install-linux.sh | bash && \
+RUN curl -L https://cdn.porter.sh/latest/install-linux.sh | bash && \
     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 ENV PATH "$PATH:/root/.porter"
