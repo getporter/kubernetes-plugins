@@ -1,5 +1,8 @@
 name: build
-on: [push,pull_request]
+on: 
+  push:
+    branches-ignore:
+      - '**'
 jobs:
   build:
     runs-on: ubuntu-latest
