@@ -38,10 +38,11 @@ build-for-debug:
 	mkdir -p $(BINDIR)
 	$(GO) build -o $(BINDIR)/$(PLUGIN)$(FILE_EXT) ./cmd/$(PLUGIN)
 
-.PHONY: build
-build:
+$(BINDIR)/$(PLUGIN)$(FILE_EXT):
 	mkdir -p $(BINDIR)
 	$(GO) build -ldflags '$(LDFLAGS)' -o $(BINDIR)/$(PLUGIN)$(FILE_EXT) ./cmd/$(PLUGIN)
+
+build: $(BINDIR)/$(PLUGIN)$(FILE_EXT)
 
 xbuild-all: test-unit
 	$(foreach OS, $(SUPPORTED_PLATFORMS), \

@@ -35,7 +35,7 @@ require (
 	get.porter.sh/operator v0.5.0
 	github.com/carolynvs/magex v0.6.1
 	github.com/google/uuid v1.2.0
-	github.com/magefile/mage v1.11.0
+	github.com/magefile/mage v1.13.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.17.0
 	github.com/tidwall/pretty v1.0.0

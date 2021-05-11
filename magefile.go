@@ -19,6 +19,7 @@ import (
 	"github.com/carolynvs/magex/pkg/gopath"
 	"github.com/carolynvs/magex/shx"
 	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/target"
 	"github.com/pkg/errors"
 
 	// mage:import
@@ -51,6 +52,10 @@ const (
 	porterRegistry   = "ghcr.io/getporter"
 	porterConfigFile = "./tests/integration/operator/testdata/operator_porter_config.yaml"
 )
+
+// Dirs to watch recursively for build target
+var srcDirs = []string{"cmd/", "pkg/"}
+var binDir = "bin/plugins/kubernetes/"
 
 // Image name for local agent
 var localAgentImgRepository = "localhost:5000/porter-agent-kubernetes"
@@ -99,8 +104,15 @@ func Vet() {
 }
 
 func Build() {
-	mg.Deps(EnsureTestCluster)
-	must.RunV("make", "xbuild-all")
+	rebuild, err := target.Dir(binDir, srcDirs...)
+	if err != nil {
+		panic(err)
+	}
+	if rebuild {
+		Clean()
+		mg.Deps(EnsureTestCluster)
+		must.RunV("make", "xbuild-all")
+	}
 }
 
 func SetupLocalTestEnv() {
