@@ -1,8 +1,0 @@
-default-storage = "kubernetes-storage"
-
-[[storage]]
-name = "kubernetes-storage"
-plugin = "kubernetes.storage"
-
-[storage.config]
-namespace = "porter-plugin-test-ns"

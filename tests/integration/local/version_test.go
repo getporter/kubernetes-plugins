@@ -52,10 +52,6 @@ func TestPrintJsonVersion(t *testing.T) {
     {
       "type": "secrets",
       "implementation": "secrets"
-    },
-    {
-      "type": "storage",
-      "implementation": "storage"
     }
   ]
 }

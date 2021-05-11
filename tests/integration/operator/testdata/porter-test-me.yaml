@@ -1,0 +1,16 @@
+apiVersion: porter.sh/v1
+kind: Installation
+metadata:
+  name: porter-test-me2
+spec:
+  schemaVersion: 1.0.0
+  namespace: dev
+  name: foo2
+  bundle:
+    repository: ghcr.io/bdegeeter/porter-test-me
+    version: 0.2.0
+  parameters:
+    delay: 0
+    exitStatus: 0
+  credentialSets:
+    - test

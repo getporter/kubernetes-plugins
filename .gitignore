@@ -1,5 +1,9 @@
 /bin
 .DS_Store
-kind.config.yaml
+/kind.config.yaml
 **/.cnab/**
 /tests/testdata/Dockerfile
+/vendor
+.porter/
+kind.config
+coverage-integration.out

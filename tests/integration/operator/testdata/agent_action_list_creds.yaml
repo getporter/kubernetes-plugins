@@ -1,0 +1,6 @@
+apiVersion: porter.sh/v1
+kind: AgentAction
+metadata:
+  name: agentaction-list-creds
+spec:
+  args: ["credential", "list", "-o=yaml"]

@@ -50,7 +50,7 @@ The `Kubernetes.storage` plugin enables Porter to store data, such as claims, pa
 
 ### Secrets
 
-The `Kubernetes.secrets` plugin enables resolution of credential or parameter values as secrets in Kubernetes.
+The `kubernetes.secrets plugin enables resolution of credential or parameter values as secrets in Kubernetes.
 
 1. Open, or create, `~/.porter/config.toml`
 1. Add the following lines1:
@@ -60,7 +60,7 @@ The `Kubernetes.secrets` plugin enables resolution of credential or parameter va
 
     [[secrets]]
     name = "kubernetes-secrets"
-    plugin = "kubernetes.secret"
+    plugin = "kubernetes.secrets"
     ```
 
 * If the plugin is being used outside of a Kubernetes cluster then add the following lines to specify the namespace to be used to store data:
@@ -81,7 +81,7 @@ at the top of the file, like so:
 
   [[secrets]]
   name = "kubernetes-secrets"
-  plugin = "kubernetes.secret"
+  plugin = "kubernetes.secrets"
 
   [[storage]]
   name = "kubernetes-storage"

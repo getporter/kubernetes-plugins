@@ -1,0 +1,13 @@
+default-secrets-plugin: "kubernetes.secrets"
+default-secrets: "kubernetes-secrets"
+default-storage: "in-cluster-mongodb"
+storage:
+  - name: "in-cluster-mongodb"
+    plugin: "mongodb"
+    config:
+      url: "mongodb://mongodb.porter-operator-system.svc.cluster.local"
+secrets:
+  - name: "kubernetes-secrets"
+    plugin: "kubernetes.secrets"
+    config:
+      namespace: "porter-plugin-test-ns"

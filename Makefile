@@ -2,7 +2,9 @@ PLUGIN = kubernetes
 PKG = get.porter.sh/plugin/$(PLUGIN)
 SHELL = /bin/bash
 
-PORTER_HOME = $(HOME)/.porter
+PORTER_VERSION=v1.0.0-alpha.13
+PORTER_HOME = ${PWD}/bin
+PORTER_RT = $(PORTER_HOME)/runtimes/porter-runtime
 
 COMMIT ?= $(shell git rev-parse --short HEAD)
 VERSION ?= $(shell git describe --tags 2> /dev/null || echo v0)
@@ -14,13 +16,12 @@ LDFLAGS = -w -X $(PKG)/pkg.Version=$(VERSION) -X $(PKG)/pkg.Commit=$(COMMIT)
 XBUILD = CGO_ENABLED=0 $(GO) build -a -tags netgo -ldflags '$(LDFLAGS)'
 BINDIR = bin/plugins/$(PLUGIN)
 KUBERNETES_CONTEXT = kind-porter
-TEST_NAMESPACE=porter-plugin-test-ns
+TEST_NAMESPACE=porter-local-plugin-test-ns
 
 CLIENT_PLATFORM ?= $(shell go env GOOS)
 CLIENT_ARCH ?= $(shell go env GOARCH)
 SUPPORTED_PLATFORMS = linux darwin windows
 SUPPORTED_ARCHES = amd64
-TESTS = secret storage both
 TIMEOUT = 240s
 
 ifeq ($(CLIENT_PLATFORM),windows)
@@ -38,11 +39,11 @@ build-for-debug:
 	$(GO) build -o $(BINDIR)/$(PLUGIN)$(FILE_EXT) ./cmd/$(PLUGIN)
 
 .PHONY: build
-build: clean
+build:
 	mkdir -p $(BINDIR)
 	$(GO) build -ldflags '$(LDFLAGS)' -o $(BINDIR)/$(PLUGIN)$(FILE_EXT) ./cmd/$(PLUGIN)
 
-xbuild-all:
+xbuild-all: test-unit
 	$(foreach OS, $(SUPPORTED_PLATFORMS), \
 		$(foreach ARCH, $(SUPPORTED_ARCHES), \
 				$(MAKE) $(MAKE_OPTS) CLIENT_PLATFORM=$(OS) CLIENT_ARCH=$(ARCH) PLUGIN=$(PLUGIN) xbuild; \
@@ -57,64 +58,46 @@ test: test-unit test-integration test-in-kubernetes
 	$(BINDIR)/$(PLUGIN)$(FILE_EXT) version
 
 test-unit: build
-	$(GO) test ./...;	
+	$(GO) test $(shell go list ./... |grep -v tests/integration|grep -v vendor );
 test-integration: export CURRENT_CONTEXT=$(shell kubectl config current-context)
-test-integration: export PORTER_HOME=$(shell echo $${PWD}/bin)
-test-integration: build bin/porter$(FILE_EXT) setup-tests clean-last-testrun
-	kubectl config use-context $(KUBERNETES_CONTEXT)
-	kubectl create namespace $(TEST_NAMESPACE)  --dry-run=client -o yaml | kubectl apply -f -
-	kubectl create secret generic password --from-literal=credential=test --namespace $(TEST_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	$(foreach TEST,$(TESTS), \
-			cp ./tests/integration/scripts/config-$(TEST)-ns.toml $$PORTER_HOME/config.toml; \
-			cp ./tests/testdata/kubernetes-plugin-test-$(TEST).json $$PORTER_HOME/credentials/kubernetes-plugin-test.json; \
-			if [[ $(TEST) == "storage" ]]; then kubectl apply -f ./tests/testdata/credentials-storage.yaml -n $(TEST_NAMESPACE); fi; \
-			if [[ $(TEST) == "both" ]]; then kubectl apply -f ./tests/testdata/credentials-secret.yaml -n $(TEST_NAMESPACE); fi; \
-			./bin/porter storage migrate; \
-			cd tests/testdata && ../../bin/porter install --cred kubernetes-plugin-test && cd ../..; \
-			if [[ $$(./bin/porter installations outputs show test_out -i kubernetes-plugin-test) != "test" ]]; then (exit 1); fi; \
-			./bin/porter installations show kubernetes-plugin-test; \
-		)
-	$(GO) test -tags=integration ./tests/integration/...;
+test-integration: bin/porter$(FILE_EXT) setup-tests clean-last-testrun
+	./tests/integration/local/scripts/test-local-integration.sh
+	$(GO) test -v ./tests/integration/local/...;
 	kubectl delete namespace $(TEST_NAMESPACE)
 	if [[ $$CURRENT_CONTEXT ]]; then \
 		kubectl config use-context $$CURRENT_CONTEXT; \
 	fi
 
-test-in-kubernetes: export CURRENT_CONTEXT=$(shell kubectl config current-context)
-test-in-kubernetes: export PORTER_HOME=$(shell echo $${PWD}/bin)
-test-in-kubernetes: build bin/porter$(FILE_EXT) setup-tests clean-last-testrun
-	kubectl config use-context $(KUBERNETES_CONTEXT)
-	kubectl apply -f ./tests/integration/scripts/setup.yaml
-	kubectl wait --timeout=$(TIMEOUT) --for=condition=ready pod/docker-registry --namespace $(TEST_NAMESPACE) 
-	cd tests/testdata && ../../bin/porter publish 
-	docker build -f ./tests/integration/scripts/Dockerfile -t localhost:5000/test:latest .
-	docker push localhost:5000/test:latest
-	kubectl apply -f ./tests/integration/scripts/run-test-pod.yaml --namespace $(TEST_NAMESPACE)
-	kubectl wait --timeout=$(TIMEOUT) --for=condition=ready pod/test --namespace $(TEST_NAMESPACE) 
-	cd tests/testdata && ../../bin/porter publish 
-	kubectl create secret generic password --from-literal=credential=test --namespace $(TEST_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	kubectl exec --stdin --tty test -n $(TEST_NAMESPACE) -- go test -tags=integration ./tests/integration/...
-	kubectl exec --stdin --tty test -n  $(TEST_NAMESPACE) -- tests/integration/scripts/test-with-porter.sh
-	kubectl delete -f ./tests/integration/scripts/setup.yaml
-	if [[ $$CURRENT_CONTEXT ]]; then \
-			kubectl config use-context $$CURRENT_CONTEXT; \
-	fi
-
 publish: bin/porter$(FILE_EXT)
 	go run mage.go -v Publish $(PLUGIN) $(VERSION) $(PERMALINK)
 
-bin/porter$(FILE_EXT): export PORTER_HOME=$(shell echo $${PWD}/bin)
-bin/porter$(FILE_EXT): 
-	curl --http1.1 -lvfsSLo bin/porter$(FILE_EXT) https://cdn.porter.sh/latest/porter-$(CLIENT_PLATFORM)-$(CLIENT_ARCH)$(FILE_EXT)
+bin/porter$(FILE_EXT):
+	mkdir -p $(PORTER_HOME)
+	@curl --silent --http1.1 -lfsSLo bin/porter$(FILE_EXT) https://cdn.porter.sh/$(PORTER_VERSION)/porter-$(CLIENT_PLATFORM)-$(CLIENT_ARCH)$(FILE_EXT)
 	chmod +x bin/porter$(FILE_EXT)
+	mkdir -p $(PORTER_HOME)/credentials
+	echo $(PORTER_HOME)
+	cp tests/integration/local/scripts/config-*.toml $(PORTER_HOME)
+	cp tests/testdata/kubernetes-plugin-test-*.json $(PORTER_HOME)/credentials
+	mkdir -p $(PORTER_HOME)/runtimes
+	
 
-setup-tests:
-	mkdir -p $$PORTER_HOME/credentials
-	cp tests/integration/scripts/config-*.toml $$PORTER_HOME
-	cp tests/testdata/kubernetes-plugin-test-*.json $$PORTER_HOME/credentials
-	mkdir -p $$PORTER_HOME/runtimes
-	cp bin/porter $$PORTER_HOME/runtimes/porter-runtime
+bin/runtimes/porter-runtime:
+	@echo $(PORTER_HOME)
+	mkdir -p bin/runtimes
+	@curl --silent --http1.1 -lfsSLo bin/runtimes/porter-runtime https://cdn.porter.sh/$(PORTER_VERSION)/porter-linux-amd64$(FILE_EXT)
+	chmod +x bin/runtimes/porter-runtime
 	./bin/porter mixin install exec
+	mkdir -p $(PORTER_HOME)/outputs/porter-state
+
+setup-tests: | bin/porter$(FILE_EXT) bin/runtimes/porter-runtime
+	@echo "Local Porter Home: $(PORTER_HOME)"
+	@echo "Porter Runtime: $(PORTER_RT)"
+
+install-linux-porter:
+	mkdir -p bin/runtimes
+	@curl --silent --http1.1 -lfsSLo bin/runtimes/porter-runtime https://cdn.porter.sh/$(PORTER_VERSION)/porter-linux-amd64$(FILE_EXT)
+	chmod +x bin/runtimes/porter-runtime
 
 install:
 	mkdir -p $(PORTER_HOME)/plugins/$(PLUGIN)
