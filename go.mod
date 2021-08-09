@@ -5,7 +5,7 @@ go 1.14
 replace github.com/hashicorp/go-plugin => github.com/carolynvs/go-plugin v1.0.1-acceptstdin
 
 require (
-	get.porter.sh/porter v0.38.3
+	get.porter.sh/porter v0.38.4
 	github.com/cnabio/cnab-go v0.20.1
 	github.com/hashicorp/go-hclog v0.16.2
 	github.com/hashicorp/go-plugin v1.4.2
