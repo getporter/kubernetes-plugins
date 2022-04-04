@@ -56,7 +56,8 @@ example. Run `mage` without any arguments to see a list of the available targets
 * **Build** builds the plugin, runs unit-test and cross compiles for local and in cluster testing.
 
 **NOTE** This project is still moving targets from the original `Makefile` into mage. Please
-file an issue for any problems encountered.
+file an issue for any problems encountered. Make will continue to be deprecated as functionality is
+migrated into mage and all new functionality should be added directly to mage.
 
 ### Utility Targets
 These are targets that you won't usually run directly, other targets use them as dependencies.
@@ -67,9 +68,6 @@ These are targets that you won't usually run directly, other targets use them as
 * **DeleteTestCluster** deletes the KIND cluster named porter.
 * **Clean** removes all
 * **CleanTestdata** removes any namespaces created by the test suite (with label porter.sh/testdata=true).
-
-The script [build/run-integration-tests.sh](build/run-integration-tests.sh) is used to build and test 
-from a clean clone of this project (or after running `mage clean`)
 
 ## Run a test installation
 

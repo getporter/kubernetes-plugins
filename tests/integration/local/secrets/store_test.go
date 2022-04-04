@@ -4,12 +4,11 @@
 package integration
 
 import (
-	//"fmt"
 	"os"
 	"testing"
 
 	"get.porter.sh/plugin/kubernetes/pkg/kubernetes/secrets"
-	"get.porter.sh/plugin/kubernetes/tests/integration/local"
+	tests "get.porter.sh/plugin/kubernetes/tests/integration/local"
 	portercontext "get.porter.sh/porter/pkg/context"
 	hclog "github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/require"

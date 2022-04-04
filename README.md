@@ -50,7 +50,7 @@ The `Kubernetes.storage` plugin enables Porter to store data, such as claims, pa
 
 ### Secrets
 
-The `kubernetes.secrets plugin enables resolution of credential or parameter values as secrets in Kubernetes.
+The `kubernetes.secrets` plugin enables resolution of credential or parameter values as secrets in Kubernetes.
 
 1. Open, or create, `~/.porter/config.toml`
 1. Add the following lines1:

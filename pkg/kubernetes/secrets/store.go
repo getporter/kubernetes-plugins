@@ -64,7 +64,9 @@ func (s *Store) connect() error {
 }
 
 func (s *Store) Resolve(keyName string, keyValue string) (string, error) {
-	s.connect()
+	if err := s.connect(); err != nil {
+		return "", err
+	}
 	if strings.ToLower(keyName) != SecretSourceType {
 		return s.hostStore.Resolve(keyName, keyValue)
 	}

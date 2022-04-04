@@ -81,7 +81,7 @@ var _ = Describe("Porter using default secrets plugin config", func() {
 	})
 })
 
-var _ = PDescribe("Porter using a secrets plugin config that doesn't specify the namespace", func() {
+var _ = Describe("Porter using a secrets plugin config that doesn't specify the namespace", func() {
 	When("applying an Installation with a CredentialSet referencing a secret that exists in the installation namespace", func() {
 		It("successfully installs", func() {
 			By("fetching CredentialSet secret from the kubernetes secret")

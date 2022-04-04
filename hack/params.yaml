@@ -7,10 +7,10 @@ name: dev-build
 parameters:
   - name: porterRepository
     source:
-      value: "localhost:5000/porter-agent-kubernetes"
+      env: PORTER_AGENT_REPOSITORY
   - name: porterVersion
     source:
-      value: "canary-dev"
+      env: PORTER_AGENT_VERSION
   - name: pullPolicy
     source:
       value: "Always"

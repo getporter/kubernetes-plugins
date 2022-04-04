@@ -43,7 +43,7 @@ const (
 	// Container name of the local registry
 	registryContainer = "registry"
 	// Operator bundle to deploy for integration tests
-	operatorVersion  = "v0.5.1"
+	operatorVersion  = "v0.5.2"
 	operatorImage    = "porter-operator"
 	operatorRegistry = "ghcr.io/getporter"
 	// Porter version to use
@@ -287,7 +287,10 @@ func SetupNamespace(name string) {
 	// It would be neat if Porter could handle this for us
 	PublishLocalPorterAgent()
 	porter("parameters", "apply", "./hack/params.yaml", "-n=operator").RunV()
-	ps := "-p=dev-build"
+	ps := ""
+	if os.Getenv("PORTER_AGENT_REPOSITORY") != "" && os.Getenv("PORTER_AGENT_VERSION") != "" {
+		ps = "-p=dev-build"
+	}
 
 	porter("invoke", "operator", "--action=configureNamespace", ps, "--param", "namespace="+name, "--param", "porterConfig="+porterConfigFile, "-c", "kind", "-n=operator").
 		CollapseArgs().Must().RunV()
@@ -358,9 +361,9 @@ func PublishLocalPorterAgent() {
 	pushImage := func(img string) error {
 		return shx.Run("docker", "push", img)
 	}
-	// if os.Getenv("PORTER_AGENT_REPOSITORY") != "" && os.Getenv("PORTER_AGENT_VERSION") != "" {
-	// 	localAgentImgName = fmt.Sprintf("%s:%s", os.Getenv("PORTER_AGENT_REPOSITORY"), os.Getenv("PORTER_AGENT_VERSION"))
-	// }
+	if os.Getenv("PORTER_AGENT_REPOSITORY") != "" && os.Getenv("PORTER_AGENT_VERSION") != "" {
+		localAgentImgName = fmt.Sprintf("%s:%s", os.Getenv("PORTER_AGENT_REPOSITORY"), os.Getenv("PORTER_AGENT_VERSION"))
+	}
 
 	if ok, _ := imageExists(localAgentImgName); ok {
 		err := pushImage(localAgentImgName)
@@ -379,9 +382,9 @@ func BuildLocalPorterAgent() {
 		}
 		return nil
 	}
-	// if os.Getenv("PORTER_AGENT_REPOSITORY") != "" && os.Getenv("PORTER_AGENT_VERSION") != "" {
-	// 	localAgentImgName = fmt.Sprintf("%s:%s", os.Getenv("PORTER_AGENT_REPOSITORY"), os.Getenv("PORTER_AGENT_VERSION"))
-	// }
+	if os.Getenv("PORTER_AGENT_REPOSITORY") != "" && os.Getenv("PORTER_AGENT_VERSION") != "" {
+		localAgentImgName = fmt.Sprintf("%s:%s", os.Getenv("PORTER_AGENT_REPOSITORY"), os.Getenv("PORTER_AGENT_VERSION"))
+	}
 	err := buildImage(localAgentImgName)
 	mgx.Must(err)
 }

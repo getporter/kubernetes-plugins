@@ -1,4 +1,3 @@
-default-secrets-plugin: "kubernetes.secrets"
 default-secrets: "kubernetes-secrets"
 default-storage: "in-cluster-mongodb"
 storage:
