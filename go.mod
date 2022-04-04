@@ -28,8 +28,9 @@ require (
 )
 
 require (
+	get.porter.sh/magefiles v0.1.2
 	get.porter.sh/operator v0.5.0
-	github.com/carolynvs/magex v0.6.1
+	github.com/carolynvs/magex v0.7.0
 	github.com/google/uuid v1.2.0
 	github.com/magefile/mage v1.13.0
 	github.com/onsi/ginkgo v1.16.5
@@ -75,7 +76,7 @@ require (
 	github.com/jeremywohl/flatten v1.0.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/karrick/godirwalk v1.16.1 // indirect
-	github.com/klauspost/compress v1.13.6 // indirect
+	github.com/klauspost/compress v1.15.1 // indirect
 	github.com/klauspost/pgzip v1.2.4 // indirect
 	github.com/magiconair/properties v1.8.1 // indirect
 	github.com/markbates/errx v1.1.0 // indirect

@@ -12,8 +12,9 @@ import (
 	"strings"
 	"time"
 
-	. "get.porter.sh/plugin/kubernetes/mage"
-	. "get.porter.sh/porter/mage/docker"
+	. "get.porter.sh/magefiles/docker"
+	. "get.porter.sh/magefiles/tests"
+
 	"github.com/carolynvs/magex/mgx"
 	"github.com/carolynvs/magex/pkg"
 	"github.com/carolynvs/magex/pkg/gopath"
@@ -21,9 +22,7 @@ import (
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/target"
 	"github.com/pkg/errors"
-
 	// mage:import
-	. "get.porter.sh/porter/mage/tests"
 )
 
 const (
@@ -128,20 +127,18 @@ func TestLocalIntegration() {
 
 // Run integration tests against the test cluster.
 func TestIntegration() {
-	// mg.Deps(UseTestEnvironment, CleanTestdata, EnsureGinkgo, EnsureDeployed)
-	mg.SerialDeps(Build, SetupLocalTestEnv, EnsureTestNamespace, UseTestEnvironment)
-
+	mg.SerialDeps(Build, SetupLocalTestEnv, EnsureTestNamespace)
+	//mg.SerialDeps(Build, SetupLocalTestEnv, EnsureTestNamespace, UseTestEnvironment)
+	if os.Getenv("PORTER_AGENT_REPOSITORY") != "" && os.Getenv("PORTER_AGENT_VERSION") != "" {
+		localAgentImgRepository = os.Getenv("PORTER_AGENT_REPOSITORY")
+		localAgentImgVersion = os.Getenv("PORTER_AGENT_VERSION")
+	}
 	shx.Command("ginkgo").Args("-p", "-nodes", "4", "-v", "./tests/integration/operator/ginkgo", "-coverprofile=coverage-integration.out").
 		Env(fmt.Sprintf("PORTER_AGENT_REPOSITORY=%s", localAgentImgRepository),
 			fmt.Sprintf("PORTER_AGENT_VERSION=%s", localAgentImgVersion),
 			"ACK_GINKGO_DEPRECATIONS=1.16.5",
 			"ACK_GINKGO_RC=true",
 			fmt.Sprintf("KUBECONFIG=%s/kind.config", pwd())).RunV()
-	//mg.SerialDeps(UseTestEnvironment)
-}
-
-func RunIntegrationTest() {
-	must.RunV("go", "test", "-v", "./tests/integration/operator/ginkgo", "-coverprofile=coverage-integration.out")
 }
 
 // Remove data created by running the test suite
@@ -388,3 +385,5 @@ func BuildLocalPorterAgent() {
 	err := buildImage(localAgentImgName)
 	mgx.Must(err)
 }
+
+// TODO: Add EnsurePorter once version is supported in getporter/magefiles/tools/install.go
