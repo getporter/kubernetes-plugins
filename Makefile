@@ -2,9 +2,7 @@ PLUGIN = kubernetes
 PKG = get.porter.sh/plugin/$(PLUGIN)
 SHELL = /bin/bash
 
-PORTER_VERSION=v1.0.0-alpha.13
-PORTER_HOME = ${PWD}/bin
-PORTER_RT = $(PORTER_HOME)/runtimes/porter-runtime
+PORTER_HOME = $(HOME)/.porter
 
 COMMIT ?= $(shell git rev-parse --short HEAD)
 VERSION ?= $(shell git describe --tags 2> /dev/null || echo v0)
@@ -33,49 +31,8 @@ endif
 test: test-unit test-integration test-in-kubernetes 
 	$(BINDIR)/$(PLUGIN)$(FILE_EXT) version
 
-test-integration: export CURRENT_CONTEXT=$(shell kubectl config current-context)
-test-integration: bin/porter$(FILE_EXT) setup-tests clean-last-testrun
-	./tests/integration/local/scripts/test-local-integration.sh
-	$(GO) test -v ./tests/integration/local/...;
-	kubectl delete namespace $(TEST_NAMESPACE)
-	if [[ $$CURRENT_CONTEXT ]]; then \
-		kubectl config use-context $$CURRENT_CONTEXT; \
-	fi
-
-bin/porter$(FILE_EXT):
-	mkdir -p $(PORTER_HOME)
-	@curl --silent --http1.1 -lfsSLo bin/porter$(FILE_EXT) https://cdn.porter.sh/$(PORTER_VERSION)/porter-$(CLIENT_PLATFORM)-$(CLIENT_ARCH)$(FILE_EXT)
-	chmod +x bin/porter$(FILE_EXT)
-	mkdir -p $(PORTER_HOME)/credentials
-	echo $(PORTER_HOME)
-	cp tests/integration/local/scripts/config-*.toml $(PORTER_HOME)
-	cp tests/testdata/kubernetes-plugin-test-*.json $(PORTER_HOME)/credentials
-	mkdir -p $(PORTER_HOME)/runtimes
+test-unit: build
+	$(GO) test $(shell go list ./... |grep -v tests/integration|grep -v vendor );
 	
-
-bin/runtimes/porter-runtime:
-	@echo $(PORTER_HOME)
-	mkdir -p bin/runtimes
-	@curl --silent --http1.1 -lfsSLo bin/runtimes/porter-runtime https://cdn.porter.sh/$(PORTER_VERSION)/porter-linux-amd64$(FILE_EXT)
-	chmod +x bin/runtimes/porter-runtime
-	./bin/porter mixin install exec
-	mkdir -p $(PORTER_HOME)/outputs/porter-state
-
-setup-tests: | bin/porter$(FILE_EXT) bin/runtimes/porter-runtime
-	@echo "Local Porter Home: $(PORTER_HOME)"
-	@echo "Porter Runtime: $(PORTER_RT)"
-
-install-linux-porter:
-	mkdir -p bin/runtimes
-	@curl --silent --http1.1 -lfsSLo bin/runtimes/porter-runtime https://cdn.porter.sh/$(PORTER_VERSION)/porter-linux-amd64$(FILE_EXT)
-	chmod +x bin/runtimes/porter-runtime
-
-install:
-	mkdir -p $(PORTER_HOME)/plugins/$(PLUGIN)
-	install $(BINDIR)/$(PLUGIN)$(FILE_EXT) $(PORTER_HOME)/plugins/$(PLUGIN)/$(PLUGIN)$(FILE_EXT)
-
-clean-last-testrun: 
-	-rm -fr testdata/.cnab
-
-clean:
-	-rm -fr bin/
+publish: bin/porter$(FILE_EXT)
+	go run mage.go -v Publish $(PLUGIN) $(VERSION) $(PERMALINK)
