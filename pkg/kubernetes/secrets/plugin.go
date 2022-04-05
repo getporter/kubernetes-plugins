@@ -19,9 +19,8 @@ const PluginKey = plugins.PluginInterface + ".kubernetes.secrets"
 var _ cnabsecrets.Store = &Plugin{}
 
 type PluginConfig struct {
-	KubeConfig string `mapstructure:"kubeconfig"`
-	Namespace  string `mapstructure:"namespace"`
-	Logger     hclog.Logger
+	Namespace string `mapstructure:"namespace"`
+	Logger    hclog.Logger
 }
 
 type Plugin struct {

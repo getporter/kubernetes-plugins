@@ -59,7 +59,7 @@ test: test-unit test-integration test-in-kubernetes
 	$(BINDIR)/$(PLUGIN)$(FILE_EXT) version
 
 test-unit: build
-	$(GO) test $(shell go list ./... |grep -v tests/integration|grep -v vendor );
+	$(GO) test $(shell go list ./... |grep -v tests/integration );
 test-integration: export CURRENT_CONTEXT=$(shell kubectl config current-context)
 test-integration: bin/porter$(FILE_EXT) setup-tests clean-last-testrun
 	./tests/integration/local/scripts/test-local-integration.sh

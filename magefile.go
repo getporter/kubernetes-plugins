@@ -13,8 +13,8 @@ import (
 	"time"
 
 	. "get.porter.sh/magefiles/docker"
+	. "get.porter.sh/magefiles/releases"
 	. "get.porter.sh/magefiles/tests"
-
 	"github.com/carolynvs/magex/mgx"
 	"github.com/carolynvs/magex/pkg"
 	"github.com/carolynvs/magex/pkg/gopath"
@@ -370,9 +370,16 @@ func PublishLocalPorterAgent() {
 
 // Workaround to get the plugin built into an agent image for testing in the operator
 func BuildLocalPorterAgent() {
+	version := "v0"
+	gitMetadata := LoadMetadata()
+	if gitMetadata.Version != "" {
+		version = gitMetadata.Version
+	}
 	buildImage := func(img string) error {
-		_, err := shx.Output("docker", "build", "-t", img, "--build-arg", fmt.Sprintf("PORTER_VERSION=%s",
-			porterVersion), "--build-arg", fmt.Sprintf("REGISTRY=%s", porterRegistry),
+		_, err := shx.Output("docker", "build", "-t", img,
+			"--build-arg", fmt.Sprintf("PLUGIN_VERSION=%s", version),
+			"--build-arg", fmt.Sprintf("PORTER_VERSION=%s", porterVersion),
+			"--build-arg", fmt.Sprintf("REGISTRY=%s", porterRegistry),
 			"-f", "tests/integration/operator/testdata/Dockerfile.customAgent", ".")
 		if err != nil {
 			return err
