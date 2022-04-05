@@ -30,36 +30,9 @@ else
 FILE_EXT=
 endif
 
-debug: clean build-for-debug  bin/porter$(FILE_EXT)
-
-debug-in-vscode: clean build-for-debug install
-
-build-for-debug:
-	mkdir -p $(BINDIR)
-	$(GO) build -o $(BINDIR)/$(PLUGIN)$(FILE_EXT) ./cmd/$(PLUGIN)
-
-$(BINDIR)/$(PLUGIN)$(FILE_EXT):
-	mkdir -p $(BINDIR)
-	$(GO) build -ldflags '$(LDFLAGS)' -o $(BINDIR)/$(PLUGIN)$(FILE_EXT) ./cmd/$(PLUGIN)
-
-build: $(BINDIR)/$(PLUGIN)$(FILE_EXT)
-
-xbuild-all: test-unit
-	$(foreach OS, $(SUPPORTED_PLATFORMS), \
-		$(foreach ARCH, $(SUPPORTED_ARCHES), \
-				$(MAKE) $(MAKE_OPTS) CLIENT_PLATFORM=$(OS) CLIENT_ARCH=$(ARCH) PLUGIN=$(PLUGIN) xbuild; \
-		))
-
-xbuild: $(BINDIR)/$(VERSION)/$(PLUGIN)-$(CLIENT_PLATFORM)-$(CLIENT_ARCH)$(FILE_EXT)
-$(BINDIR)/$(VERSION)/$(PLUGIN)-$(CLIENT_PLATFORM)-$(CLIENT_ARCH)$(FILE_EXT):
-	mkdir -p $(dir $@)
-	GOOS=$(CLIENT_PLATFORM) GOARCH=$(CLIENT_ARCH) $(XBUILD) -o $@ ./cmd/$(PLUGIN)
-
 test: test-unit test-integration test-in-kubernetes 
 	$(BINDIR)/$(PLUGIN)$(FILE_EXT) version
 
-test-unit: build
-	$(GO) test $(shell go list ./... |grep -v tests/integration );
 test-integration: export CURRENT_CONTEXT=$(shell kubectl config current-context)
 test-integration: bin/porter$(FILE_EXT) setup-tests clean-last-testrun
 	./tests/integration/local/scripts/test-local-integration.sh
@@ -68,9 +41,6 @@ test-integration: bin/porter$(FILE_EXT) setup-tests clean-last-testrun
 	if [[ $$CURRENT_CONTEXT ]]; then \
 		kubectl config use-context $$CURRENT_CONTEXT; \
 	fi
-
-publish: bin/porter$(FILE_EXT)
-	go run mage.go -v Publish $(PLUGIN) $(VERSION) $(PERMALINK)
 
 bin/porter$(FILE_EXT):
 	mkdir -p $(PORTER_HOME)

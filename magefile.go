@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -22,6 +23,7 @@ import (
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/target"
 	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 	// mage:import
 )
 
@@ -34,6 +36,8 @@ const (
 
 	// Relative location of the KUBECONFIG for the test cluster
 	kubeconfig = "kind.config"
+
+	pluginName = "kubernetes"
 
 	// Namespace of the porter plugin
 	testNamespace = "porter-plugin-test-ns"
@@ -53,8 +57,12 @@ const (
 )
 
 // Dirs to watch recursively for build target
-var srcDirs = []string{"cmd/", "pkg/"}
-var binDir = "bin/plugins/kubernetes/"
+var (
+	srcDirs             = []string{"cmd/", "pkg/"}
+	binDir              = "bin/plugins/kubernetes/"
+	pluginPkg           = fmt.Sprintf("./cmd/%s", pluginName)
+	supportedClientGOOS = []string{"linux", "darwin", "windows"}
+)
 
 // Image name for local agent
 var localAgentImgRepository = "localhost:5000/porter-agent-kubernetes"
@@ -66,14 +74,11 @@ var operatorBundleRef = fmt.Sprintf("%s/%s:%s", operatorRegistry, operatorImage,
 // Build a command that stops the build on if the command fails
 var must = shx.CommandBuilder{StopOnError: true}
 
-// We are migrating to mage, but for now keep using make as the main build script interface.
-
 // Publish the cross-compiled binaries.
-// func Publish(plugin string, version string, permalink string) {
-// 	releases.PreparePluginForPublish(plugin, version, permalink)
-// 	releases.PublishPlugin(plugin, version, permalink)
-// 	releases.PublishPluginFeed(plugin, version)
-// }
+func Publish() {
+	PublishPlugin(pluginName)
+	PublishPluginFeed(pluginName)
+}
 
 // Add GOPATH/bin to the path on the GitHub Actions agent
 // TODO: Add to magex
@@ -102,15 +107,46 @@ func Vet() {
 	must.RunV("go", "vet", "./...")
 }
 
+// Run unit tests defined in srcDirs
+func TestUnit() {
+	v := ""
+	if mg.Verbose() {
+		v = "-v"
+	}
+	args := []string{"test", v}
+	for _, dir := range srcDirs {
+		args = append(args, fmt.Sprintf("./%s...", dir))
+	}
+	must.Command("go", args...).CollapseArgs().RunV()
+
+	// Verify integration tests compile
+	must.Run("go", "test", "-run=non", "./tests/...")
+}
+
 func Build() {
 	rebuild, err := target.Dir(binDir, srcDirs...)
 	if err != nil {
-		panic(err)
+		mgx.Must(fmt.Errorf("error inspecting source dirs %s: %w", srcDirs, err))
 	}
 	if rebuild {
 		Clean()
 		mg.Deps(EnsureTestCluster)
-		must.RunV("make", "xbuild-all")
+		TestUnit()
+		//TODO: fix issue with XBuildAll https://github.com/getporter/magefiles/issues/4
+		var g errgroup.Group
+		for _, goos := range supportedClientGOOS {
+			goos := goos
+			g.Go(func() error {
+				return XBuild(pluginPkg, pluginName, binDir, goos, "amd64")
+			})
+		}
+		mgx.Must(g.Wait())
+		info := LoadMetadata()
+		os.RemoveAll(filepath.Join(binDir, "dev"))
+		shx.Copy(filepath.Join(binDir, info.Version), filepath.Join(binDir, "dev"), shx.CopyRecursive)
+		//copy local arch bin to bin/plugins/kubernetes/kubernetes for local integration testing
+		shx.Copy(filepath.Join(binDir, info.Version, fmt.Sprintf("%s-%s-%s", pluginName, runtime.GOOS, "amd64")), filepath.Join(binDir, pluginName))
+		PreparePluginForPublish(pluginName)
 	}
 }
 
@@ -370,14 +406,8 @@ func PublishLocalPorterAgent() {
 
 // Workaround to get the plugin built into an agent image for testing in the operator
 func BuildLocalPorterAgent() {
-	version := "v0"
-	gitMetadata := LoadMetadata()
-	if gitMetadata.Version != "" {
-		version = gitMetadata.Version
-	}
 	buildImage := func(img string) error {
 		_, err := shx.Output("docker", "build", "-t", img,
-			"--build-arg", fmt.Sprintf("PLUGIN_VERSION=%s", version),
 			"--build-arg", fmt.Sprintf("PORTER_VERSION=%s", porterVersion),
 			"--build-arg", fmt.Sprintf("REGISTRY=%s", porterRegistry),
 			"-f", "tests/integration/operator/testdata/Dockerfile.customAgent", ".")
