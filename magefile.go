@@ -85,6 +85,22 @@ func Publish() {
 	PublishPluginFeed(pluginName)
 }
 
+func Install() {
+	userPorterHome, found := os.LookupEnv("PORTER_HOME")
+	if !found {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			mgx.Must(err)
+		}
+		userPorterHome = filepath.Join(homeDir, ".porter")
+	}
+	pluginDir := filepath.Join(userPorterHome, "plugins", pluginName)
+	err := shx.Command("mkdir", "-p", pluginDir).RunV()
+	mgx.Must(err)
+	err = shx.Command("install", filepath.Join(binDir, pluginName), filepath.Join(pluginDir, pluginName)).RunV()
+	mgx.Must(err)
+}
+
 // Add GOPATH/bin to the path on the GitHub Actions agent
 // TODO: Add to magex
 func addGopathBinOnGithubActions() error {

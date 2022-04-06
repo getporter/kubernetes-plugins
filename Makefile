@@ -1,6 +1,5 @@
 MAGE:= go run mage.go -v
 
-.PHONY: build
 build:
 	$(MAGE) Build
 
@@ -16,7 +15,6 @@ test-integration:
 test-local-integration:
 	$(MAGE) TestLocalIntegration
 
-#TODO: add install target
 install:
 	$(MAGE) Install
 
