@@ -112,6 +112,7 @@ func Vet() {
 	must.RunV("go", "vet", "./...")
 }
 func Test() {
+	mg.Deps(EnsureTestCluster)
 	mg.SerialDeps(Build, TestLocalIntegration, TestIntegration)
 }
 

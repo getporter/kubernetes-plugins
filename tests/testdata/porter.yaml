@@ -4,7 +4,7 @@ description: Test Bundle for kubernetes plugin
 registry: localhost:5000
 
 credentials:
-  - name: test
+  - name: test-cred
     env: TEST_PASSWORD
 
 mixins:
@@ -15,7 +15,7 @@ install:
       description: Echo credentials
       command: bash
       flags:
-        c: "'echo {{ bundle.credentials.test }} >  /tmp/test_out'"
+        c: "'echo {{ bundle.credentials.test-cred }} >  /tmp/test_out'"
       outputs:
         - name: test_out
           path: /tmp/test_out
@@ -25,7 +25,7 @@ upgrade:
       description: Echo credentials
       command: bash
       flags:
-        c: "'echo {{ bundle.credentials.test }} >  /tmp/test_out'"
+        c: "'echo {{ bundle.credentials.test-cred }} >  /tmp/test_out'"
       outputs:
         - name: test_out
           path: /tmp/test_out
@@ -35,7 +35,7 @@ uninstall:
       description: Echo credentials
       command: bash
       flags:
-        c: "'echo {{ bundle.credentials.test }} >  /tmp/test_out'"
+        c: "'echo {{ bundle.credentials.test-cred }} >  /tmp/test_out'"
       outputs:
         - name: test_out
           path: /tmp/test_out
