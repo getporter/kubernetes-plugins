@@ -25,12 +25,11 @@ const (
 // Store implements the backing store for secrets as kubernetes secrets.
 type Store struct {
 	*portercontext.Context
-	hostStore  cnabsecrets.Store
-	Secrets    map[string]map[string]string
-	namespace  string
-	kubeconfig string
-	clientSet  *kubernetes.Clientset
-	logger     hclog.Logger
+	hostStore cnabsecrets.Store
+	Secrets   map[string]map[string]string
+	namespace string
+	clientSet *kubernetes.Clientset
+	logger    hclog.Logger
 }
 
 func NewStore(c *portercontext.Context, cfg PluginConfig) *Store {
@@ -51,12 +50,11 @@ func (s *Store) connect() error {
 	}
 	s.logger.Info(fmt.Sprintf("Store.connect: pre-clientset %s : %s", "namespace", s.namespace))
 	clientSet, namespace, err := k8shelper.GetClientSet(s.namespace)
-	s.namespace = *namespace
-	s.logger.Info(fmt.Sprintf("Store.connect: post-clientset %s : %s", "namespace", s.namespace))
-
 	if err != nil {
 		return err
 	}
+	s.namespace = *namespace
+	s.logger.Info(fmt.Sprintf("Store.connect: post-clientset %s : %s", "namespace", s.namespace))
 
 	s.clientSet = clientSet
 

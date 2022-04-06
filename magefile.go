@@ -112,11 +112,12 @@ func Vet() {
 	must.RunV("go", "vet", "./...")
 }
 func Test() {
-	mg.SerialDeps(TestUnit, TestLocalIntegration, TestIntegration)
+	mg.SerialDeps(Build, TestLocalIntegration, TestIntegration)
 }
 
 // Run unit tests defined in srcDirs
 func TestUnit() {
+	mg.Deps(EnsureTestCluster)
 	v := ""
 	if mg.Verbose() {
 		v = "-v"
@@ -137,9 +138,7 @@ func Build() {
 		mgx.Must(fmt.Errorf("error inspecting source dirs %s: %w", srcDirs, err))
 	}
 	if rebuild {
-		Clean()
-		mg.Deps(EnsureTestCluster)
-		TestUnit()
+		mg.SerialDeps(Clean, TestUnit)
 		//TODO: fix issue with XBuildAll https://github.com/getporter/magefiles/issues/4
 		var g errgroup.Group
 		for _, goos := range supportedClientGOOS {
@@ -168,7 +167,6 @@ func TestLocalIntegration() {
 	ctx, _ := kubectl("config", "current-context").OutputV()
 	testLocalIntegration()
 	must.RunV("go", "test", "-v", "./tests/integration/local/...")
-	kubectl("delete", "namespace", localTestNamespace).RunV()
 	if ctx != "" {
 		kubectl("config", "use-context", ctx).RunV()
 	}
@@ -177,18 +175,21 @@ func TestLocalIntegration() {
 func testLocalIntegration() {
 	kubectl("config", "use-context", localTestKubernetesContext).RunV()
 	kubectl("create", "namespace", localTestNamespace).RunV()
+	defer func() {
+		kubectl("delete", "namespace", localTestNamespace).RunV()
+	}()
 	kubectl("create", "secret", "generic", "password", "--from-literal=credential=test", "--namespace", localTestNamespace).RunV()
 	shx.Copy(filepath.Join(pwd(), "tests/integration/local/scripts/config-secret-test-local.toml"), filepath.Join(porterHome, "config.toml"))
 	kubectl("apply", "-f", filepath.Join(pwd(), "tests/testdata/credentials-secret.yaml"), "-n", localTestNamespace).RunV()
 	porter("plugins", "list").RunV()
 	porter("credentials", "apply", filepath.Join(pwd(), "tests/testdata/kubernetes-plugin-test-secret.json")).RunV()
-	err := porter("install", "--force", "--cred", "kubernetes-plugin-test", "-f", filepath.Join(pwd(), "tests/testdata/porter.yaml"), "--debug", "--debug-plugins").RunV()
-	fmt.Println(err)
+	porter("install", "--force", "--cred", "kubernetes-plugin-test", "-f", filepath.Join(pwd(), "tests/testdata/porter.yaml"), "--debug", "--debug-plugins").RunV()
 }
 
 // Run integration tests against the test cluster.
 func TestIntegration() {
-	mg.SerialDeps(Build, SetupTests, EnsureTestNamespace)
+	mg.Deps(Build, EnsureGinkgo)
+	mg.SerialDeps(SetupTests, EnsureTestNamespace)
 	if os.Getenv("PORTER_AGENT_REPOSITORY") != "" && os.Getenv("PORTER_AGENT_VERSION") != "" {
 		localAgentImgRepository = os.Getenv("PORTER_AGENT_REPOSITORY")
 		localAgentImgVersion = os.Getenv("PORTER_AGENT_VERSION")
@@ -399,7 +400,7 @@ func kubectl(args ...string) shx.PreparedCommand {
 
 // Run porter using the local storage, not the in-cluster storage
 func porter(args ...string) shx.PreparedCommand {
-	return shx.Command("bin/porter").Args(args...).
+	return must.Command("bin/porter").Args(args...).
 		Env("PORTER_DEFAULT_STORAGE=",
 			"PORTER_DEFAULT_STORAGE_PLUGIN=mongodb-docker",
 			fmt.Sprintf("PORTER_HOME=%s", porterHome))
