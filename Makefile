@@ -1,38 +1,19 @@
-PLUGIN = kubernetes
-PKG = get.porter.sh/plugin/$(PLUGIN)
-SHELL = /bin/bash
+MAGE:= go run mage.go -v
 
-PORTER_HOME = $(HOME)/.porter
+build:
+	$(MAGE) Build
 
-COMMIT ?= $(shell git rev-parse --short HEAD)
-VERSION ?= $(shell git describe --tags 2> /dev/null || echo v0)
-PERMALINK ?= $(shell git describe --tags --exact-match &> /dev/null && echo latest || echo canary)
+test:
+	$(MAGE) Test
 
-GO = GO111MODULE=on go
-RECORDTEST = RECORDER_MODE=record $(GO)
-LDFLAGS = -w -X $(PKG)/pkg.Version=$(VERSION) -X $(PKG)/pkg.Commit=$(COMMIT)
-XBUILD = CGO_ENABLED=0 $(GO) build -a -tags netgo -ldflags '$(LDFLAGS)'
-BINDIR = bin/plugins/$(PLUGIN)
-KUBERNETES_CONTEXT = kind-porter
-TEST_NAMESPACE=porter-local-plugin-test-ns
+test-unit:
+	$(MAGE) TestUnit
 
-CLIENT_PLATFORM ?= $(shell go env GOOS)
-CLIENT_ARCH ?= $(shell go env GOARCH)
-SUPPORTED_PLATFORMS = linux darwin windows
-SUPPORTED_ARCHES = amd64
-TIMEOUT = 240s
+test-integration:
+	$(MAGE) TestIntegration
 
-ifeq ($(CLIENT_PLATFORM),windows)
-FILE_EXT=.exe
-else
-FILE_EXT=
-endif
+test-local-integration:
+	$(MAGE) TestLocalIntegration
 
-test: test-unit test-integration test-in-kubernetes 
-	$(BINDIR)/$(PLUGIN)$(FILE_EXT) version
-
-test-unit: build
-	$(GO) test $(shell go list ./... |grep -v tests/integration|grep -v vendor );
-	
-publish: bin/porter$(FILE_EXT)
-	go run mage.go -v Publish $(PLUGIN) $(VERSION) $(PERMALINK)
+publish: 
+	$(MAGE) Publish

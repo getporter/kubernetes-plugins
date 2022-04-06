@@ -112,7 +112,7 @@ func Vet() {
 	must.RunV("go", "vet", "./...")
 }
 func Test() {
-	mg.SerialDeps(TestUnit, TestLocalIntegration)
+	mg.SerialDeps(TestUnit, TestLocalIntegration, TestIntegration)
 }
 
 // Run unit tests defined in srcDirs
@@ -165,9 +165,7 @@ func SetupLocalTestEnv() {
 // Run local integration tests against the test cluster.
 func TestLocalIntegration() {
 	mg.SerialDeps(Build, SetupLocalTestEnv)
-	ctx, err := kubectl("config", "current-context").OutputV()
-	mgx.Must(err)
-	//must.RunV("./tests/integration/local/scripts/test-local-integration.sh")
+	ctx, _ := kubectl("config", "current-context").OutputV()
 	testLocalIntegration()
 	must.RunV("go", "test", "-v", "./tests/integration/local/...")
 	kubectl("delete", "namespace", localTestNamespace).RunV()
@@ -184,12 +182,12 @@ func testLocalIntegration() {
 	kubectl("apply", "-f", filepath.Join(pwd(), "tests/testdata/credentials-secret.yaml"), "-n", localTestNamespace).RunV()
 	porter("plugins", "list").RunV()
 	porter("credentials", "apply", filepath.Join(pwd(), "tests/testdata/kubernetes-plugin-test-secret.json")).RunV()
-	porter("install", "--force", "--cred", "kubernetes-plugin-test", "-f", filepath.Join(pwd(), "tests/testdata/porter.yaml"), "--debug", "--debug-plugins").RunV()
+	err := porter("install", "--force", "--cred", "kubernetes-plugin-test", "-f", filepath.Join(pwd(), "tests/testdata/porter.yaml"), "--debug", "--debug-plugins").RunV()
+	fmt.Println(err)
 }
 
 // Run integration tests against the test cluster.
 func TestIntegration() {
-	//mg.SerialDeps(Build, SetupLocalTestEnv, EnsureTestNamespace)
 	mg.SerialDeps(Build, SetupTests, EnsureTestNamespace)
 	if os.Getenv("PORTER_AGENT_REPOSITORY") != "" && os.Getenv("PORTER_AGENT_VERSION") != "" {
 		localAgentImgRepository = os.Getenv("PORTER_AGENT_REPOSITORY")
@@ -458,7 +456,9 @@ func BuildLocalPorterAgent() {
 func EnsurePorterAt(version string) {
 	if _, err := os.Stat(filepath.Join(porterHome, "porter")); err != nil {
 		// TODO: pkg should support downloading to specific directory instead of just GOPATH to allow for namespaced versions of porter
-		err := pkg.DownloadToGopathBin("https://cdn.porter.sh/{{.VERSION}}/porter-{{.GOOS}}-{{.GOARCH}}{{.EXT}}", "porter", version)
+		err := pkg.DownloadToGopathBin("https://cdn.porter.sh/{{.VERSION}}/porter-linux-amd64", "porter-runtime", version)
+		mgx.Must(err)
+		err = pkg.DownloadToGopathBin("https://cdn.porter.sh/{{.VERSION}}/porter-{{.GOOS}}-{{.GOARCH}}{{.EXT}}", "porter", version)
 		mgx.Must(err)
 	}
 }
@@ -477,11 +477,16 @@ func EnsurePorterHome() {
 	if _, err := os.Stat(porterHome); err != nil {
 		os.MkdirAll(porterHome, 0755)
 	}
+	if _, err := os.Stat(filepath.Join(porterHome, "runtimes")); err != nil {
+		os.MkdirAll(filepath.Join(porterHome, "runtimes"), 0755)
+	}
 }
 
 func EnsurePorterHomeBin() {
 	mg.Deps(EnsurePorterHome)
 	EnsurePorterAt(porterVersion)
-	err := shx.Copy(filepath.Join(gopath.GetGopathBin(), "porter"), porterHome)
+	err := shx.Copy(filepath.Join(gopath.GetGopathBin(), "porter-runtime"), filepath.Join(porterHome, "runtimes/porter-runtime"))
+	mgx.Must(err)
+	err = shx.Copy(filepath.Join(gopath.GetGopathBin(), "porter"), porterHome)
 	mgx.Must(err)
 }
