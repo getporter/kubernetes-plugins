@@ -19,7 +19,7 @@ var _ portersecrets.SecretsProtocol = &Store{}
 
 const (
 	SecretSourceType = "secret"
-	SecretDataKey    = "credential"
+	SecretDataKey    = "value"
 )
 
 // Store implements the backing store for secrets as kubernetes secrets.
@@ -76,7 +76,10 @@ func (s *Store) Resolve(keyName string, keyValue string) (string, error) {
 		return "", err
 	}
 	if val, ok := secret.Data[SecretDataKey]; !ok {
-		return "", InvalidSecretDataKeyError{msg: fmt.Sprintf("Key \"%s\" not found in secret", SecretDataKey)}
+		return "", InvalidSecretDataKeyError{msg: fmt.Sprintf(`The secret %s/%s does not have a key named %s. `+
+			`The kubernetes.secrets plugin requires that the Kubernetes secret is named after the secret referenced in the `+
+			`Porter parameter or credential set, and secret value is stored in a key on the Kubernetes secret named %s`,
+			s.namespace, keyValue, SecretDataKey, SecretDataKey)}
 	} else {
 		return string(val), nil
 	}

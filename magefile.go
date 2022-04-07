@@ -194,7 +194,7 @@ func testLocalIntegration() {
 	defer func() {
 		kubectl("delete", "namespace", localTestNamespace).RunV()
 	}()
-	kubectl("create", "secret", "generic", "password", "--from-literal=credential=test", "--namespace", localTestNamespace).RunV()
+	kubectl("create", "secret", "generic", "password", "--from-literal=value=test", "--namespace", localTestNamespace).RunV()
 	shx.Copy(filepath.Join(pwd(), "tests/integration/local/scripts/config-secret-test-local.toml"), filepath.Join(porterHome, "config.toml"))
 	kubectl("apply", "-f", filepath.Join(pwd(), "tests/testdata/credentials-secret.yaml"), "-n", localTestNamespace).RunV()
 	porter("plugins", "list").RunV()
@@ -252,7 +252,6 @@ func CleanTestdata() {
 			}
 			kubectl("delete", "ns", namespace).Run()
 		}
-
 	}
 }
 
@@ -398,7 +397,7 @@ func testSecretExists() bool {
 	return err == nil
 }
 func setupTestSecret() {
-	kubectl("create", "secret", "generic", "password", "--from-literal=credential=test", "-n", testNamespace).Must(false).Run()
+	kubectl("create", "secret", "generic", "password", "--from-literal=value=test", "-n", testNamespace).Must(false).Run()
 }
 
 func SetupTestCredentialSet() {

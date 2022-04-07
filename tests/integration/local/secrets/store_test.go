@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -94,7 +95,10 @@ func Test_IncorrectSecretDataKey(t *testing.T) {
 	t.Run("Test Incorrect Secret Data Key", func(t *testing.T) {
 		resolved, err := store.Resolve(secrets.SecretSourceType, "testkey")
 		require.Error(t, err)
-		require.EqualError(t, err, "Key \"credential\" not found in secret")
+		require.EqualError(t, err, fmt.Sprintf(`The secret %s/%s does not have a key named %s. `+
+			`The kubernetes.secrets plugin requires that the Kubernetes secret is named after the secret referenced in the `+
+			`Porter parameter or credential set, and secret value is stored in a key on the Kubernetes secret named %s`,
+			nsName, "testkey", secrets.SecretDataKey, secrets.SecretDataKey))
 		require.Equal(t, resolved, "")
 	})
 
