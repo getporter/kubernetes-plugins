@@ -128,7 +128,6 @@ func Vet() {
 	must.RunV("go", "vet", "./...")
 }
 func Test() {
-	mg.Deps(EnsureTestCluster)
 	mg.SerialDeps(Build, TestLocalIntegration, TestIntegration)
 }
 
@@ -211,7 +210,7 @@ func TestIntegration() {
 		localAgentImgRepository = os.Getenv("PORTER_AGENT_REPOSITORY")
 		localAgentImgVersion = os.Getenv("PORTER_AGENT_VERSION")
 	}
-	shx.Command("ginkgo").Args("-p", "-nodes", "4", "-v", "./tests/integration/operator/ginkgo", "-coverprofile=coverage-integration.out").
+	must.Command("ginkgo").Args("-p", "-nodes", "4", "-v", "./tests/integration/operator/ginkgo", "-coverprofile=coverage-integration.out").
 		Env(fmt.Sprintf("PORTER_AGENT_REPOSITORY=%s", localAgentImgRepository),
 			fmt.Sprintf("PORTER_AGENT_VERSION=%s", localAgentImgVersion),
 			"ACK_GINKGO_DEPRECATIONS=1.16.5",

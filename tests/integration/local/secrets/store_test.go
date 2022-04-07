@@ -27,7 +27,6 @@ func Test_Default_Namespace(t *testing.T) {
 			require.EqualError(t, err, "secrets \"test\" not found")
 		} else {
 			require.EqualError(t, err, "secrets \"test\" not found")
-			//require.EqualError(t, err, "open /var/run/secrets/kubernetes.io/serviceaccount/namespace: no such file or directory")
 		}
 	})
 }
@@ -56,7 +55,7 @@ func TestResolve_Secret(t *testing.T) {
 	tc := portercontext.TestContext{}
 	store := secrets.NewStore(tc.Context, k8sConfig)
 	defer tests.DeleteNamespace(t, nsName)
-	tests.CreateSecret(t, nsName, "testkey", "testvalue")
+	tests.CreateSecret(t, nsName, secrets.SecretDataKey, "testkey", "testvalue")
 	t.Run("resolve secret source: value", func(t *testing.T) {
 		resolved, err := store.Resolve(secrets.SecretSourceType, "testkey")
 		require.NoError(t, err)
@@ -74,10 +73,29 @@ func Test_UppercaseKey(t *testing.T) {
 	}
 	tc := portercontext.TestContext{}
 	store := secrets.NewStore(tc.Context, k8sConfig)
-	tests.CreateSecret(t, nsName, "testkey", "testvalue")
+	tests.CreateSecret(t, nsName, secrets.SecretDataKey, "testkey", "testvalue")
 	t.Run("Test Uppercase Key", func(t *testing.T) {
 		resolved, err := store.Resolve(secrets.SecretSourceType, "TESTkey")
 		require.NoError(t, err)
 		require.Equal(t, "testvalue", resolved)
 	})
+}
+
+func Test_IncorrectSecretDataKey(t *testing.T) {
+	nsName := tests.CreateNamespace(t)
+	defer tests.DeleteNamespace(t, nsName)
+	k8sConfig := secrets.PluginConfig{
+		Namespace: nsName,
+		Logger:    logger,
+	}
+	tc := portercontext.TestContext{}
+	store := secrets.NewStore(tc.Context, k8sConfig)
+	tests.CreateSecret(t, nsName, "invalid", "testkey", "testvalue")
+	t.Run("Test Incorrect Secret Data Key", func(t *testing.T) {
+		resolved, err := store.Resolve(secrets.SecretSourceType, "testkey")
+		require.Error(t, err)
+		require.EqualError(t, err, "Key \"credential\" not found in secret")
+		require.Equal(t, resolved, "")
+	})
+
 }

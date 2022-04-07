@@ -64,6 +64,7 @@ These are targets that you won't usually run directly, other targets use them as
 
 * **BuildLocalPorterAgent** builds an agent image with plugin for operator integration testing
 * **EnsureTestCluster** starts a KIND cluster if it's not already running.
+* **PublishLocalPorterAgent** builds and publishes agent image to KIND cluster.
 * **CreateTestCluster** creates a new KIND cluster named porter.
 * **DeleteTestCluster** deletes the KIND cluster named porter.
 * **Clean** removes all

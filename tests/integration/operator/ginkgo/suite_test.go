@@ -15,10 +15,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/utils/pointer"
 
-	//ctrl "sigs.k8s.io/controller-runtime"
 	porterv1 "get.porter.sh/operator/api/v1"
-	//k8s "k8s.io/client-go/kubernetes"
-	//"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"

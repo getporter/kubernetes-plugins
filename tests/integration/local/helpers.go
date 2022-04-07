@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"get.porter.sh/plugin/kubernetes/pkg/kubernetes"
-	"get.porter.sh/plugin/kubernetes/pkg/kubernetes/secrets"
 	portercontext "get.porter.sh/porter/pkg/context"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
@@ -88,12 +87,12 @@ func DeleteNamespace(t *testing.T, nsName string) string {
 	return nsName
 }
 
-func CreateSecret(t *testing.T, nsName string, name string, value string) {
+func CreateSecret(t *testing.T, nsName string, key string, name string, value string) {
 	clientSet, err := k8s.NewForConfig(GetKubernetesConfig(t))
 	name = strings.ToLower(name)
 	require.NoError(t, err)
 	data := make(map[string][]byte, 1)
-	data[secrets.SecretDataKey] = []byte(value)
+	data[key] = []byte(value)
 	secret := &v1.Secret{ObjectMeta: metav1.ObjectMeta{Name: name}, Data: data}
 	_, err = clientSet.CoreV1().Secrets(nsName).Create(context.Background(), secret, metav1.CreateOptions{})
 	require.NoError(t, err)

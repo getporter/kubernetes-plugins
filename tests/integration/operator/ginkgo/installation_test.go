@@ -7,6 +7,7 @@ import (
 	"time"
 
 	porterv1 "get.porter.sh/operator/api/v1"
+	"get.porter.sh/plugin/kubernetes/pkg/kubernetes/secrets"
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -34,7 +35,7 @@ var _ = Describe("Porter using default secrets plugin config", func() {
 			installationName := fmt.Sprintf("default-plugin-%v", randId)
 			ns := createTestNamespace(context.Background())
 			ctx := context.Background()
-			createSecret(ns, "password", "test")
+			createSecret(ns, secrets.SecretDataKey, "password", "test")
 			credSet := NewCredSet("test", "insecureValue", "password")
 			agentAction := createCredentialSetAgentAction(ns, credSet)
 			pollAA := func() bool { return agentActionPoll(agentAction) }
@@ -60,7 +61,32 @@ var _ = Describe("Porter using default secrets plugin config", func() {
 			installationName := fmt.Sprintf("default-plugin-%v", randId)
 			installationNs := createTestNamespace(ctx)
 			secretsNs := createTestNamespace(ctx)
-			createSecret(secretsNs, "password", "test")
+			createSecret(secretsNs, secrets.SecretDataKey, "password", "test")
+			credSet := NewCredSet("test", "insecureValue", "password")
+			agentAction := createCredentialSetAgentAction(installationNs, credSet)
+			pollAA := func() bool { return agentActionPoll(agentAction) }
+			Eventually(pollAA, time.Second*120, time.Second*3).Should(BeTrue())
+			inst := NewInstallation(installationName, installationNs)
+			Expect(k8sClient.Create(ctx, inst)).Should(Succeed())
+
+			// Wait for the job to be created
+			installations := waitForInstallationStarted(ctx, installationNs, installationName)
+			installation := installations.Items[0]
+
+			// Wait for the installation to complete
+			installation = waitForInstallationFinished(ctx, installation)
+
+			// Validate that the installation status was updated
+			validateInstallStatus(inst, porterv1.PhaseFailed)
+		})
+	})
+	When("applying an Installation with a CredentialSet referencing a secret with an invalid data key in the same namespace as the Installation resource", func() {
+		It("fails to install", func() {
+			randId := uuid.New()
+			ctx := context.Background()
+			installationName := fmt.Sprintf("default-plugin-%v", randId)
+			installationNs := createTestNamespace(ctx)
+			createSecret(installationNs, "invalidKey", "password", "test")
 			credSet := NewCredSet("test", "insecureValue", "password")
 			agentAction := createCredentialSetAgentAction(installationNs, credSet)
 			pollAA := func() bool { return agentActionPoll(agentAction) }
@@ -90,7 +116,7 @@ var _ = Describe("Porter using a secrets plugin config that doesn't specify the 
 			defaultSecretsCfgName := "kubernetes-secrets"
 			ns := createTestNamespace(context.Background())
 			ctx := context.Background()
-			createSecret(ns, "password", "test")
+			createSecret(ns, secrets.SecretDataKey, "password", "test")
 			porterCfg := NewPorterConfig(ns)
 			k8sSecretsCfg := NewSecretsPluginConfig(defaultSecretsCfgName, nil)
 			SetPorterConfigSecrets(porterCfg, k8sSecretsCfg)
@@ -129,7 +155,7 @@ var _ = Describe("Porter using secrets plugin configured using same namespace as
 			installationName := fmt.Sprintf("porter-hello-%v", randId)
 			ns := createTestNamespace(context.Background())
 			ctx := context.Background()
-			createSecret(ns, "password", "test")
+			createSecret(ns, secrets.SecretDataKey, "password", "test")
 			defaultSecretsCfgName := "kubernetes-secrets"
 			porterCfg := NewPorterConfig(ns)
 			secretsNamespaceCfg := &SecretsConfig{Namespace: ns}
@@ -167,7 +193,7 @@ var _ = Describe("Porter k8s secrets plugin configured using a different namespa
 			secretNamespace := createTestNamespace(context.Background())
 			ctx := context.Background()
 			var defaultSecretsCfgName, secretName, secretValue, credSetName = "kubernetes-secrets", "password", "test", "test"
-			createSecret(secretNamespace, secretName, secretValue)
+			createSecret(secretNamespace, secrets.SecretDataKey, secretName, secretValue)
 			porterCfg := NewPorterConfig(installNamespace)
 			secretsNamespaceCfg := &SecretsConfig{Namespace: secretNamespace}
 			k8sSecretsCfg := NewSecretsPluginConfig(defaultSecretsCfgName, secretsNamespaceCfg)
@@ -376,7 +402,7 @@ func NewSecretsPluginConfig(name string, secretsCfg *SecretsConfig) porterv1.Sec
 	return cfg
 }
 
-func createSecret(namespace, secretName, secretContents string) {
+func createSecret(namespace, key, secretName, secretContents string) {
 	k8sSecret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
@@ -385,7 +411,7 @@ func createSecret(namespace, secretName, secretContents string) {
 		Type:      corev1.SecretTypeOpaque,
 		Immutable: pointer.BoolPtr(true),
 		Data: map[string][]byte{
-			"credential": []byte(secretContents),
+			key: []byte(secretContents),
 		},
 	}
 	Expect(k8sClient.Create(context.Background(), k8sSecret)).Should(Succeed())

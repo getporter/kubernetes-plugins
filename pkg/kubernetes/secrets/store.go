@@ -75,5 +75,9 @@ func (s *Store) Resolve(keyName string, keyValue string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(secret.Data[SecretDataKey]), nil
+	if val, ok := secret.Data[SecretDataKey]; !ok {
+		return "", InvalidSecretDataKeyError{msg: fmt.Sprintf("Key \"%s\" not found in secret", SecretDataKey)}
+	} else {
+		return string(val), nil
+	}
 }
