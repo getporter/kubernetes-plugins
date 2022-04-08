@@ -2,21 +2,26 @@ steps:
   - task: GoTool@0
     inputs:
       version: "$(GOVERSION)"
-    displayName: 'Install Go'
+    displayName: "Install Go"
 
   - script: |
       set -xeuo pipefail
       mkdir -p /home/vsts/go/bin/
       echo "##vso[task.prependpath]/home/vsts/go/bin/"
-    displayName: 'Configure Go'
+    displayName: "Configure Go"
 
   - script: make build
-    workingDirectory: '$(System.DefaultWorkingDirectory)'
-    displayName: 'Build'
+    workingDirectory: "$(System.DefaultWorkingDirectory)"
+    displayName: "Build"
 
   - script: make test-unit
-    workingDirectory: '$(System.DefaultWorkingDirectory)'
-    displayName: 'Unit Test'
-  
-  - bash: ./build/run-integration-tests.sh
-    displayName: "Integration Test"
+    workingDirectory: "$(System.DefaultWorkingDirectory)"
+    displayName: "Unit Test"
+
+  - script: make test-local-integration
+    workingDirectory: "$(System.DefaultWorkingDirectory)"
+    displayName: "Local Integration Test"
+
+  - script: make test-integration
+    workingDirectory: "$(System.DefaultWorkingDirectory)"
+    displayName: "Operator Integration Test"
