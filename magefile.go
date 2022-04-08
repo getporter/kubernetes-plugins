@@ -337,7 +337,7 @@ func EnsureTestNamespace() {
 
 // Ensure ginkgo is installed.
 func EnsureGinkgo() {
-	mgx.Must(pkg.EnsurePackage("github.com/onsi/ginkgo/ginkgo", "", ""))
+	mgx.Must(pkg.EnsurePackage("github.com/onsi/ginkgo/ginkgo", "1.16.5", ""))
 }
 
 func setupTestNamespace() {
