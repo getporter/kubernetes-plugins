@@ -4,26 +4,26 @@ trigger:
       - refs/heads/main
   tags:
     include:
-    - v*
+      - v*
 pr: none
 
 pool:
-  vmImage: 'Ubuntu 18.04'
+  vmImage: "Ubuntu 18.04"
 
 variables:
-  GOVERSION: "1.14.6"
+  GOVERSION: "1.17.7"
   tag: $[replace(variables['Build.SourceBranch'],'refs/tags/','')]
 
 steps:
   - template: build-and-test.yml
-  
-  - script: make xbuild-all 
-    workingDirectory: '$(System.DefaultWorkingDirectory)'
-    displayName: 'Build Release'
+
+  - script: make build
+    workingDirectory: "$(System.DefaultWorkingDirectory)"
+    displayName: "Build Release"
 
   - script: |
       make publish
     env:
       GITHUB_TOKEN: $(GITHUB_TOKEN)
-    workingDirectory: '$(System.DefaultWorkingDirectory)'
-    displayName: 'Publish'
+    workingDirectory: "$(System.DefaultWorkingDirectory)"
+    displayName: "Publish"

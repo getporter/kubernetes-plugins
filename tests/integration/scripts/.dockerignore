@@ -1,6 +1,0 @@
-.**
-/bin
-!/bin/plugins/kubernetes/**
-/build
-/tests/testdata/.cnab
-/tests/testdata/Dockerfile

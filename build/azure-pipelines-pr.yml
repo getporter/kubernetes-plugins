@@ -1,13 +1,13 @@
 pr:
-- main
+  - main
 
 trigger: none
 
 pool:
-  vmImage: 'Ubuntu 18.04'
+  vmImage: "Ubuntu 18.04"
 
 variables:
-  GOVERSION: "1.14.6"
+  GOVERSION: "1.17.7"
 
 steps:
   - template: build-and-test.yml

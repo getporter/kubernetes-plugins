@@ -19,7 +19,6 @@ func (p *Plugin) PrintVersion(opts version.Options) error {
 		},
 		Implementations: []plugins.Implementation{
 			{Type: "secrets", Name: "secrets"},
-			{Type: "storage", Name: "storage"},
 		},
 	}
 	return version.PrintVersion(p.Context, opts, metadata)

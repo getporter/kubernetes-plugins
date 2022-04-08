@@ -1,0 +1,36 @@
+name: build
+on: 
+  push:
+    branches-ignore:
+      - '**'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Cache
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+      - name: Set up Mage
+        run: go run mage.go EnsureMage
+      - name: Test Integration
+        run: build/run-integration-tests.sh
+      - name: Report Integration Test Coverage
+        uses: codecov/codecov-action@v1
+        with:
+          files: ./coverage-integration.out
+          flags: integration-tests

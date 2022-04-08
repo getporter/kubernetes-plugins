@@ -4,6 +4,8 @@ This is a set of Kubernetes plugins for [Porter](https://github.com/getporter/po
 
 [![Build Status](https://dev.azure.com/getporter/porter/_apis/build/status/kubernetes-plugins-release?branchName=main)](https://dev.azure.com/getporter/porter/_build/latest?definitionId=23&branchName=main)
 
+The plugin enables Porter to use Kubernetes secrets as source for CredentialSets.
+
 ## Installation
 
 The plugin is distributed as a single binary, `kubernetes`. The following snippet will clone this repository, build the binary
@@ -17,85 +19,72 @@ make build install
 
 ## Usage
 
-After installion, you must modify your porter configuration file and select which types of data you want the plugin to store. The plugin supports both porter data (storage) and secret values (secrets), either or both of these capabilities can be used depending on configuration.
+After installation, you must modify your porter configuration file.
+The plugin supports secret values (secrets).
 
 The plugin can be used when porter is running inside a Kubernetes cluster - in which case it will connect automatically, it can also be used from outside a cluster in which case it will either use the kubeconfig file sourced from the `KUBECONFIG` environment variable or `$HOME/.kube/config` if this is not set.
 
 When running outside a cluster the plugin requires configuration to specify which namespace it should store data in, when running inside a cluster it will use the namespace of the pod that porter is running in.
 
-The plugin also requires that the user or serivce account that is being used with Kubernetes has `"get","list","create","delete",` and `"patch"` permissions on secrets in the namepsace.
+The plugin also requires that the user or service account that is being used with Kubernetes has `"get","list","create","delete",` and `"patch"` permissions on secrets in the namespace.
 
-### Storage
+The [Porter Operator](https://github.com/getporter/operator) is the primary use case
+for running in Kubernetes which configures the necessary service accounts via 
+it's `configureNamespace` custom action.
 
-The `Kubernetes.storage` plugin enables Porter to store data, such as claims, parameters and credentials, in a Kubernetes cluster. The plugin stores data in Kubernetes as secrets.
+```
+porter invoke porterops --action configureNamespace --param namespace=quickstart -c porterops
+```
 
-1. Open, or create, `~/.porter/config.toml`.
-
-1. Add the following lines:
-
-    ```toml
-    default-storage = "kubernetes-storage"
-
-    [[storage]]
-    name = "kubernetes-storage"
-    plugin = "kubernetes.storage"
-    ```
-
-* If the plugin is being used outside of a Kubernetes cluster then add the following lines to specify the namespace to be used to store data:
-
-    ```toml
-    [storage.config]
-    namespace = "<namespace name>"
-    ```
 
 ### Secrets
 
-The `Kubernetes.secrets` plugin enables resolution of credential or parameter values as secrets in Kubernetes.
+The `kubernetes.secrets` plugin enables resolution of credential or parameter values as secrets in Kubernetes via the Porter Operator.
 
-1. Open, or create, `~/.porter/config.toml`
+1. Create, `./porter-k8s-config.yaml`
 1. Add the following lines1:
 
-    ```toml
-    default-secrets = "kubernetes-secrets"
+    ```yaml
+    default-secrets: "kubernetes-secrets"
+    secrets:
+    - name: "kubernetes-secrets"
+      plugin: "kubernetes.secrets"
+    ```
+1. Provide the Porter config to the `configureNamespace` operator bundle action
 
-    [[secrets]]
-    name = "kubernetes-secrets"
-    plugin = "kubernetes.secret"
+    ```
+    porter invoke operator --action=configureNamespace --param namespace=<namespace name> --param porterConfig=porter-k8s-config.toml -c kind -n=operator
     ```
 
 * If the plugin is being used outside of a Kubernetes cluster then add the following lines to specify the namespace to be used to store data:
 
-    ```toml
-    [secrets.config]
-    namespace = "<namespace name>"
+    ```yaml
+    default-secrets: "kubernetes-secrets"
+    secrets:
+      - name: "kubernetes-secrets"
+        plugin: "kubernetes.secrets"
+        config:
+          namespace: "<namespace name>"
     ```
 
-### Storage and Secrets combined
+In both cases the Kubernetes secret must be created with a `credential` key
+```
+kubectl --namespace "<namespace name>" create secret generic password --from-literal=credential=test 
+```
 
-When both storage and secrets are configured, be sure to place the `default-*` stanzas
-at the top of the file, like so:
+Porter credentials file `test-credentials.yaml`
+```
+---
+schemaType: CredentialSet
+schemaVersion: 1.0.1
+namespace: ''
+name: kubernetes-plugin-test
+credentials:
+- name: test-cred
+  source:
+    secret: password
+```
 
-  ```toml
-  default-secrets = "kubernetes-secrets"
-  default-storage = "kubernetes-storage"
-
-  [[secrets]]
-  name = "kubernetes-secrets"
-  plugin = "kubernetes.secret"
-
-  [[storage]]
-  name = "kubernetes-storage"
-  plugin = "kubernetes.storage"
-  ```
-
-If runing outside of Kubernetes then also include the namespace configuration
-  
-  ```toml
-  [secrets.config]
-  namespace = "<namespace name>"
-
-  [storage.config]
-  namespace = "<namespace name>"
-  ```
-
-Otherwise, Porter won't be able to parse the configuration correctly.
+```
+porter credentials apply test-credentials.yaml
+```

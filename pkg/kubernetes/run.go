@@ -1,22 +1,27 @@
 package kubernetes
 
 import (
+	"fmt"
 	"strings"
 
 	"get.porter.sh/plugin/kubernetes/pkg/kubernetes/config"
 	"get.porter.sh/plugin/kubernetes/pkg/kubernetes/secrets"
-	"get.porter.sh/plugin/kubernetes/pkg/kubernetes/storage"
+	portercontext "get.porter.sh/porter/pkg/context"
 	"get.porter.sh/porter/pkg/plugins"
 	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/go-plugin"
+	hplugin "github.com/hashicorp/go-plugin"
 	"github.com/pkg/errors"
 )
 
 type RunOptions struct {
 	Key               string
-	selectedPlugin    plugin.Plugin
+	selectedPlugin    hplugin.Plugin
 	selectedInterface string
 }
+
+const (
+	PluginProtocolVersion uint = 1
+)
 
 func (o *RunOptions) Validate(args []string, cfg config.Config) error {
 	if len(args) == 0 {
@@ -41,6 +46,21 @@ func (o *RunOptions) Validate(args []string, cfg config.Config) error {
 	return nil
 }
 
+//TODO: implement our own Serve until porter/pkg/plugins supports protocolVersion
+// Serve a single named plugin.
+func Serve(interfaceName string, pluginImplementation hplugin.Plugin, protocolVersion uint) {
+	ServeMany(map[string]hplugin.Plugin{interfaceName: pluginImplementation}, protocolVersion)
+}
+
+// Serve many plugins that the client will select by named interface.
+func ServeMany(pluginMap map[string]hplugin.Plugin, protocolVersion uint) {
+	plugins.HandshakeConfig.ProtocolVersion = protocolVersion
+	hplugin.Serve(&hplugin.ServeConfig{
+		HandshakeConfig: plugins.HandshakeConfig,
+		Plugins:         pluginMap,
+	})
+}
+
 func (p *Plugin) Run(args []string) {
 	// This logger only helps log errors with loading the plugin
 	logger := hclog.New(&hclog.LoggerOptions{
@@ -49,13 +69,12 @@ func (p *Plugin) Run(args []string) {
 		Level:      hclog.Debug,
 		JSONFormat: true,
 	})
-
 	err := p.LoadConfig()
+	logger.Debug(fmt.Sprintf("Run.Plugin.Config.Namespace: %s", p.Config.Namespace))
 	if err != nil {
 		logger.Error(err.Error())
 		return
 	}
-
 	// We are not following the normal CLI pattern here because
 	// if we write to stdout without the hclog, it will cause the plugin framework to blow up
 	var opts RunOptions
@@ -64,13 +83,16 @@ func (p *Plugin) Run(args []string) {
 		logger.Error(err.Error())
 		return
 	}
-
-	plugins.Serve(opts.selectedInterface, opts.selectedPlugin)
+	Serve(opts.selectedInterface, opts.selectedPlugin, PluginProtocolVersion)
 }
 
-func getPlugins(cfg config.Config) map[string]func() plugin.Plugin {
-	return map[string]func() plugin.Plugin{
-		secrets.PluginInterface: func() plugin.Plugin { return secrets.NewPlugin(cfg) },
-		storage.PluginInterface: func() plugin.Plugin { return storage.NewPlugin(cfg) },
+func getPlugins(cfg config.Config) map[string]func() hplugin.Plugin {
+	cxt := portercontext.New()
+	secretPlugin, _ := secrets.NewPlugin(cxt, cfg)
+
+	return map[string]func() hplugin.Plugin{
+		secrets.PluginKey: func() hplugin.Plugin {
+			return secretPlugin
+		},
 	}
 }
