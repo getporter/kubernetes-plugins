@@ -15,7 +15,7 @@ replace (
 
 require (
 	get.porter.sh/magefiles v0.2.2
-	get.porter.sh/porter v1.0.0-alpha.13
+	get.porter.sh/porter v1.0.0-alpha.19
 	github.com/cnabio/cnab-go v0.23.1
 	github.com/hashicorp/go-hclog v1.0.0
 	github.com/hashicorp/go-plugin v1.4.2
@@ -62,7 +62,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4-0.20210608040537-544b4180ac70 // indirect
-	github.com/google/go-cmp v0.5.6 // indirect
+	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/googleapis/gnostic v0.5.5 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
@@ -95,11 +95,11 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/osteele/liquid v1.3.0 // indirect
 	github.com/osteele/tuesday v1.0.3 // indirect
-	github.com/pelletier/go-toml v1.9.3 // indirect
+	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pierrec/lz4/v4 v4.0.3 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/qri-io/jsonpointer v0.1.1 // indirect
-	github.com/qri-io/jsonschema v0.2.2-0.20210723092138-2eb22ee8115f // indirect
+	github.com/qri-io/jsonschema v0.2.2-0.20210831022256-780655b2ba0e // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/smartystreets/assertions v1.0.0 // indirect
 	github.com/spf13/afero v1.5.1 // indirect
@@ -113,14 +113,14 @@ require (
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	go.opentelemetry.io/otel v1.3.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.3.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.3.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.3.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.3.0 // indirect
-	go.opentelemetry.io/otel/sdk v1.3.0 // indirect
-	go.opentelemetry.io/otel/trace v1.3.0 // indirect
-	go.opentelemetry.io/proto/otlp v0.11.0 // indirect
+	go.opentelemetry.io/otel v1.4.1 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.4.1 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.4.1 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.4.1 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.4.1 // indirect
+	go.opentelemetry.io/otel/sdk v1.4.1 // indirect
+	go.opentelemetry.io/otel/trace v1.4.1 // indirect
+	go.opentelemetry.io/proto/otlp v0.12.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.19.1 // indirect
