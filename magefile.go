@@ -5,32 +5,33 @@ package main
 
 import (
 	"fmt"
+
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 
-	. "get.porter.sh/magefiles/docker"
-	. "get.porter.sh/magefiles/releases"
-	. "get.porter.sh/magefiles/tests"
+	"get.porter.sh/magefiles/ci"
+	"get.porter.sh/magefiles/docker"
+	// mage:import
+	_ "get.porter.sh/magefiles/docker"
+	"get.porter.sh/magefiles/porter"
+	"get.porter.sh/magefiles/releases"
+	"get.porter.sh/magefiles/tests"
+	// mage:import
+	_ "get.porter.sh/magefiles/tests"
+	"get.porter.sh/plugin/kubernetes/mage/setup"
 	"github.com/carolynvs/magex/mgx"
 	"github.com/carolynvs/magex/pkg"
-	"github.com/carolynvs/magex/pkg/gopath"
 	"github.com/carolynvs/magex/shx"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/target"
 	"github.com/pkg/errors"
-	"golang.org/x/sync/errgroup"
-	// mage:import
 )
 
 const (
-	// Version of KIND to install if not already present
-	kindVersion = "v0.11.1"
-
 	// Name of the KIND cluster used for testing
 	kindClusterName = "porter"
 
@@ -54,7 +55,7 @@ const (
 	operatorImage    = "porter-operator"
 	operatorRegistry = "ghcr.io/getporter"
 	// Porter version to use
-	porterVersion = "v1.0.0-alpha.13"
+	porterVersion = "v1.0.0-alpha.19"
 	// Docker registry for porter client container
 	porterRegistry   = "ghcr.io/getporter"
 	porterConfigFile = "./tests/integration/operator/testdata/operator_porter_config.yaml"
@@ -62,7 +63,7 @@ const (
 
 // Dirs to watch recursively for build target
 var (
-	srcDirs             = []string{"cmd/", "pkg/"}
+	srcDirs             = []string{"cmd/", "pkg/", "go.mod", "magefile.go"}
 	binDir              = "bin/plugins/kubernetes/"
 	pluginPkg           = fmt.Sprintf("./cmd/%s", pluginName)
 	supportedClientGOOS = []string{"linux", "darwin", "windows"}
@@ -76,50 +77,40 @@ var localAgentImgVersion = "canary-dev"
 var localAgentImgName = fmt.Sprintf("%s:%s", localAgentImgRepository, localAgentImgVersion)
 
 var operatorBundleRef = fmt.Sprintf("%s/%s:%s", operatorRegistry, operatorImage, operatorVersion)
-var porterHome = filepath.Join(pwd(), "bin")
 
 // Build a command that stops the build on if the command fails
 var must = shx.CommandBuilder{StopOnError: true}
 
 // Publish the cross-compiled binaries.
 func Publish() {
-	PublishPlugin(pluginName)
-	PublishPluginFeed(pluginName)
+	releases.PublishPlugin(pluginName)
+	releases.PublishPluginFeed(pluginName)
+}
+
+// Test out publish locally, with your github forks
+// Assumes that you forked and kept the repository name unchanged.
+func TestPublish(username string) {
+	pluginRepo := fmt.Sprintf("github.com/%s/%s-plugins", username, pluginName)
+	pkgRepo := fmt.Sprintf("https://github.com/%s/packages.git", username)
+	fmt.Printf("Publishing a release to %s and committing a mixin feed to %s\n", pluginRepo, pkgRepo)
+	fmt.Printf("If you use different repository names, set %s and %s then call mage Publish instead.\n", releases.ReleaseRepository, releases.PackagesRemote)
+	os.Setenv(releases.ReleaseRepository, pluginRepo)
+	os.Setenv(releases.PackagesRemote, pkgRepo)
+
+	Publish()
 }
 
 func Install() {
-	userPorterHome, found := os.LookupEnv("PORTER_HOME")
-	if !found {
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			mgx.Must(err)
-		}
-		userPorterHome = filepath.Join(homeDir, ".porter")
-	}
-	pluginDir := filepath.Join(userPorterHome, "plugins", pluginName)
-	err := shx.Command("mkdir", "-p", pluginDir).RunV()
-	mgx.Must(err)
-	err = shx.Command("install", filepath.Join(binDir, pluginName), filepath.Join(pluginDir, pluginName)).RunV()
-	mgx.Must(err)
-}
+	pluginDir := filepath.Join(porter.GetPorterHome(), "plugins", pluginName)
+	mgx.Must(os.MkdirAll(pluginDir, 0700))
 
-// Add GOPATH/bin to the path on the GitHub Actions agent
-// TODO: Add to magex
-func addGopathBinOnGithubActions() error {
-	githubPath := os.Getenv("GITHUB_PATH")
-	if githubPath == "" {
-		return nil
-	}
-
-	log.Println("Adding GOPATH/bin to the PATH for the GitHub Actions Agent")
-	gopathBin := gopath.GetGopathBin()
-	return ioutil.WriteFile(githubPath, []byte(gopathBin), 0644)
+	// Copy the plugin into PORTER_HOME
+	mgx.Must(shx.Copy(filepath.Join(binDir, pluginName), pluginDir))
 }
 
 // Ensure mage is installed.
-func EnsureMage() error {
-	addGopathBinOnGithubActions()
-	return pkg.EnsureMage("v1.11.0")
+func ConfigureAgent() error {
+	return ci.ConfigureAgent()
 }
 
 func Fmt() {
@@ -130,58 +121,54 @@ func Vet() {
 	must.RunV("go", "vet", "./...")
 }
 func Test() {
-	mg.SerialDeps(Build, TestLocalIntegration, TestIntegration)
+	mg.SerialDeps(Build, TestUnit, TestLocalIntegration, TestIntegration)
 }
 
 // Run unit tests defined in srcDirs
 func TestUnit() {
-	mg.Deps(EnsureTestCluster)
+	mg.Deps(tests.EnsureTestCluster)
+
 	v := ""
 	if mg.Verbose() {
 		v = "-v"
 	}
-	args := []string{"test", v}
-	for _, dir := range srcDirs {
-		args = append(args, fmt.Sprintf("./%s...", dir))
-	}
-	must.Command("go", args...).CollapseArgs().RunV()
+
+	must.Command("go", "test", v, "./...").CollapseArgs().RunV()
 
 	// Verify integration tests compile
 	must.Run("go", "test", "-run=non", "./tests/...")
 }
 
 func Build() {
-	rebuild, err := target.Dir(binDir, srcDirs...)
+	rebuild, err := target.Path(filepath.Join(binDir, "kubernetes"), srcDirs...)
 	if err != nil {
 		mgx.Must(fmt.Errorf("error inspecting source dirs %s: %w", srcDirs, err))
 	}
 	if rebuild {
-		mg.SerialDeps(Clean, TestUnit)
-		//TODO: fix issue with XBuildAll https://github.com/getporter/magefiles/issues/4
-		var g errgroup.Group
-		for _, goos := range supportedClientGOOS {
-			goos := goos
-			g.Go(func() error {
-				return XBuild(pluginPkg, pluginName, binDir, goos, "amd64")
-			})
-		}
-		mgx.Must(g.Wait())
-		info := LoadMetadata()
-		os.RemoveAll(filepath.Join(binDir, "dev"))
-		shx.Copy(filepath.Join(binDir, info.Version), filepath.Join(binDir, "dev"), shx.CopyRecursive)
-		//copy local arch bin to bin/plugins/kubernetes/kubernetes for local integration testing
-		shx.Copy(filepath.Join(binDir, info.Version, fmt.Sprintf("%s-%s-%s", pluginName, runtime.GOOS, "amd64")), filepath.Join(binDir, pluginName))
-		PreparePluginForPublish(pluginName)
+		mgx.Must(releases.BuildClient(pluginPkg, pluginName, binDir))
+	} else {
+		fmt.Println("target is up-to-date")
 	}
 }
 
-func SetupLocalTestEnv() {
-	SetupTests()
+func XBuildAll() {
+	rebuild, err := target.Path(filepath.Join(binDir, "dev/kubernetes-linux-amd64"), srcDirs...)
+	if err != nil {
+		mgx.Must(fmt.Errorf("error inspecting source dirs %s: %w", srcDirs, err))
+	}
+	if rebuild {
+		releases.XBuildAll(pluginPkg, pluginName, binDir)
+	} else {
+		fmt.Println("target is up-to-date")
+	}
+
+	releases.PreparePluginForPublish(pluginName)
 }
 
 // Run local integration tests against the test cluster.
 func TestLocalIntegration() {
-	mg.SerialDeps(Build, SetupLocalTestEnv)
+	mg.Deps(Build)
+
 	ctx, _ := kubectl("config", "current-context").OutputV()
 	testLocalIntegration()
 	must.RunV("go", "test", "-v", "./tests/integration/local/...")
@@ -197,27 +184,29 @@ func testLocalIntegration() {
 		kubectl("delete", "namespace", localTestNamespace).RunV()
 	}()
 	kubectl("create", "secret", "generic", "password", "--from-literal=value=test", "--namespace", localTestNamespace).RunV()
-	shx.Copy(filepath.Join(pwd(), "tests/integration/local/scripts/config-secret-test-local.toml"), filepath.Join(porterHome, "config.toml"))
-	kubectl("apply", "-f", filepath.Join(pwd(), "tests/testdata/credentials-secret.yaml"), "-n", localTestNamespace).RunV()
-	porter("plugins", "list").RunV()
-	porter("credentials", "apply", filepath.Join(pwd(), "tests/testdata/kubernetes-plugin-test-secret.json")).RunV()
-	porter("install", "--force", "--cred", "kubernetes-plugin-test", "-f", filepath.Join(pwd(), "tests/testdata/porter.yaml"), "--debug", "--debug-plugins").RunV()
+	mgx.Must(shx.Copy("tests/integration/local/scripts/config-secret-test-local.toml", "bin/config.toml"))
+	kubectl("apply", "-f", "tests/testdata/credentials-secret.yaml", "-n", localTestNamespace).RunV()
+	buildPorterCmd("credentials", "apply", "kubernetes-plugin-test-secret.json").
+		In("tests/testdata").RunV()
+	buildPorterCmd("install", "--force", "--cred", "kubernetes-plugin-test", "--debug", "--debug-plugins").
+		In("tests/testdata").RunV()
 }
 
 // Run integration tests against the test cluster.
 func TestIntegration() {
-	mg.Deps(Build, EnsureGinkgo)
-	mg.SerialDeps(SetupTests, EnsureTestNamespace)
+	mg.Deps(XBuildAll, EnsureGinkgo)
+	mg.Deps(EnsureTestNamespace)
+
 	if os.Getenv("PORTER_AGENT_REPOSITORY") != "" && os.Getenv("PORTER_AGENT_VERSION") != "" {
 		localAgentImgRepository = os.Getenv("PORTER_AGENT_REPOSITORY")
 		localAgentImgVersion = os.Getenv("PORTER_AGENT_VERSION")
 	}
-	must.Command("ginkgo").Args("-p", "-nodes", ginkgoNodes, "-v", "./tests/integration/operator/ginkgo", "-coverprofile=coverage-integration.out").
+	must.Command("ginkgo").Args("-p", "-nodes", ginkgoNodes, "-tags=integration", "-v", "./tests/integration/operator/ginkgo", "-coverprofile=coverage-integration.out").
 		Env(fmt.Sprintf("PORTER_AGENT_REPOSITORY=%s", localAgentImgRepository),
 			fmt.Sprintf("PORTER_AGENT_VERSION=%s", localAgentImgVersion),
 			"ACK_GINKGO_DEPRECATIONS=1.16.5",
 			"ACK_GINKGO_RC=true",
-			fmt.Sprintf("KUBECONFIG=%s/kind.config", pwd())).RunV()
+			fmt.Sprintf("KUBECONFIG=%s", filepath.Join(pwd(), "kind.config"))).RunV()
 }
 
 // Remove data created by running the test suite
@@ -259,17 +248,18 @@ func CleanTestdata() {
 
 // Build the operator and deploy it to the test cluster using
 func DeployOperator() {
-	mg.Deps(SetupLocalTestEnv)
-	porter("credentials", "apply", "hack/creds.yaml", "-n=operator", "--debug", "--debug-plugins").Must().RunV()
+	mg.Deps(tests.EnsureTestCluster)
+
+	buildPorterCmd("credentials", "apply", "hack/creds.yaml", "-n=operator", "--debug", "--debug-plugins").Must().RunV()
 	if os.Getenv("PORTER_OPERATOR_REF") != "" {
 		operatorBundleRef = os.Getenv("PORTER_OPERATOR_REF")
 	}
-	porter("install", "operator", "-r", operatorBundleRef, "-c=kind", "--force", "-n=operator").Must().RunV()
+	buildPorterCmd("install", "operator", "-r", operatorBundleRef, "-c=kind", "--force", "-n=operator").Must().RunV()
 }
 
 // Delete the operator from the test cluster
 func DeleteOperator() {
-	porter("uninstall", "operator", "-r", operatorBundleRef, "-c=kind", "--force", "-n=operator").Must().RunV()
+	buildPorterCmd("uninstall", "operator", "-r", operatorBundleRef, "-c=kind", "--force", "-n=operator").Must().RunV()
 }
 
 // get the config of the current kind cluster, if available
@@ -356,18 +346,18 @@ func namespaceExists(name string) bool {
 // Create a namespace, usage: mage SetupNamespace demo.
 // Configures the namespace for use with the operator.
 func SetupNamespace(name string) {
-	mg.Deps(EnsureTestCluster)
+	mg.Deps(tests.EnsureTestCluster)
 
 	// Only specify the parameter set we have the env vars set
 	// It would be neat if Porter could handle this for us
 	PublishLocalPorterAgent()
-	porter("parameters", "apply", "./hack/params.yaml", "-n=operator").RunV()
+	buildPorterCmd("parameters", "apply", "./hack/params.yaml", "-n=operator").RunV()
 	ps := ""
 	if os.Getenv("PORTER_AGENT_REPOSITORY") != "" && os.Getenv("PORTER_AGENT_VERSION") != "" {
 		ps = "-p=dev-build"
 	}
 
-	porter("invoke", "operator", "--action=configureNamespace", ps, "--param", "namespace="+name, "--param", "porterConfig="+porterConfigFile, "-c", "kind", "-n=operator").
+	buildPorterCmd("invoke", "operator", "--action=configureNamespace", ps, "--param", "namespace="+name, "--param", "porterConfig="+porterConfigFile, "-c", "kind", "-n=operator").
 		CollapseArgs().Must().RunV()
 	kubectl("label", "namespace", name, "--overwrite=true", "porter.sh/devenv=true").Must().RunV()
 
@@ -376,12 +366,13 @@ func SetupNamespace(name string) {
 
 // Remove the test cluster and registry.
 func Clean() {
-	mg.Deps(DeleteTestCluster, StopDockerRegistry)
 	os.RemoveAll("bin")
+	CleanCluster()
 }
 
-func CleanLastTestRun() {
-	os.RemoveAll(".cnab")
+// Remove the test cluster and registry.
+func CleanCluster() {
+	mg.Deps(tests.DeleteTestCluster, docker.StopDockerRegistry)
 }
 
 func pwd() string {
@@ -411,22 +402,26 @@ func TestInstallation() {
 }
 
 func kubectl(args ...string) shx.PreparedCommand {
+	mg.Deps(tests.EnsureKubectl)
+
 	kubeconfig := fmt.Sprintf("KUBECONFIG=%s", os.Getenv("KUBECONFIG"))
 	return must.Command("kubectl", args...).Env(kubeconfig)
 }
 
 // Run porter using the local storage, not the in-cluster storage
-func porter(args ...string) shx.PreparedCommand {
-	return must.Command("bin/porter").Args(args...).
+func buildPorterCmd(args ...string) shx.PreparedCommand {
+	mg.SerialDeps(porter.UseBinForPorterHome, porter.EnsurePorter, setup.InstallMixins)
+
+	return must.Command(filepath.Join(pwd(), "bin/porter")).Args(args...).
 		Env("PORTER_DEFAULT_STORAGE=",
 			"PORTER_DEFAULT_STORAGE_PLUGIN=mongodb-docker",
-			fmt.Sprintf("PORTER_HOME=%s", porterHome))
+			fmt.Sprintf("PORTER_HOME=%s", filepath.Join(pwd(), "bin")))
 }
 
 func PublishLocalPorterAgent() {
-	// Check if we have a local porter build
-	// TODO: let's move some of these helpers into Porter
-	mg.Deps(EnsureTestCluster, SetupLocalTestEnv)
+	mg.Deps(docker.StartDockerRegistry)
+
+	// Check if we have a local porter build and use it in the agent
 	BuildLocalPorterAgent()
 	imageExists := func(img string) (bool, error) {
 		out, err := shx.Output("docker", "image", "inspect", img)
@@ -468,43 +463,5 @@ func BuildLocalPorterAgent() {
 		localAgentImgName = fmt.Sprintf("%s:%s", os.Getenv("PORTER_AGENT_REPOSITORY"), os.Getenv("PORTER_AGENT_VERSION"))
 	}
 	err := buildImage(localAgentImgName)
-	mgx.Must(err)
-}
-
-func EnsurePorterAt(version string) {
-	if _, err := os.Stat(filepath.Join(porterHome, "porter")); err != nil {
-		// TODO: pkg should support downloading to specific directory instead of just GOPATH to allow for namespaced versions of porter
-		err := pkg.DownloadToGopathBin("https://cdn.porter.sh/{{.VERSION}}/porter-linux-amd64", "porter-runtime", version)
-		mgx.Must(err)
-		err = pkg.DownloadToGopathBin("https://cdn.porter.sh/{{.VERSION}}/porter-{{.GOOS}}-{{.GOARCH}}{{.EXT}}", "porter", version)
-		mgx.Must(err)
-	}
-}
-
-func SetupTests() {
-	mg.Deps(EnsurePorterHomeBin)
-	err := shx.Command("mkdir", "-p", filepath.Join(porterHome, "credentials")).RunV()
-	mgx.Must(err)
-	err = shx.Copy(filepath.Join(pwd(), "tests/integration/local/scripts/config-*.toml"), porterHome)
-	mgx.Must(err)
-	err = shx.Copy(filepath.Join(pwd(), "tests/testdata/kubernetes-plugin-test-*.json"), porterHome)
-	mgx.Must(err)
-	porter("mixin", "install", "exec").RunV()
-}
-func EnsurePorterHome() {
-	if _, err := os.Stat(porterHome); err != nil {
-		os.MkdirAll(porterHome, 0755)
-	}
-	if _, err := os.Stat(filepath.Join(porterHome, "runtimes")); err != nil {
-		os.MkdirAll(filepath.Join(porterHome, "runtimes"), 0755)
-	}
-}
-
-func EnsurePorterHomeBin() {
-	mg.Deps(EnsurePorterHome)
-	EnsurePorterAt(porterVersion)
-	err := shx.Copy(filepath.Join(gopath.GetGopathBin(), "porter-runtime"), filepath.Join(porterHome, "runtimes/porter-runtime"))
-	mgx.Must(err)
-	err = shx.Copy(filepath.Join(gopath.GetGopathBin(), "porter"), porterHome)
 	mgx.Must(err)
 }

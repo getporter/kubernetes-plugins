@@ -1,3 +1,4 @@
+schemaVersion: 1.0.0-alpha.1
 apiVersion: porter.sh/v1
 kind: Installation
 metadata:
