@@ -66,6 +66,8 @@ var (
 	binDir              = "bin/plugins/kubernetes/"
 	pluginPkg           = fmt.Sprintf("./cmd/%s", pluginName)
 	supportedClientGOOS = []string{"linux", "darwin", "windows"}
+	// number of nodes for ginkgo parallel test execution (1=sequential)
+	ginkgoNodes = "1"
 )
 
 // Image name for local agent
@@ -210,7 +212,7 @@ func TestIntegration() {
 		localAgentImgRepository = os.Getenv("PORTER_AGENT_REPOSITORY")
 		localAgentImgVersion = os.Getenv("PORTER_AGENT_VERSION")
 	}
-	must.Command("ginkgo").Args("-p", "-nodes", "4", "-v", "./tests/integration/operator/ginkgo", "-coverprofile=coverage-integration.out").
+	must.Command("ginkgo").Args("-p", "-nodes", ginkgoNodes, "-v", "./tests/integration/operator/ginkgo", "-coverprofile=coverage-integration.out").
 		Env(fmt.Sprintf("PORTER_AGENT_REPOSITORY=%s", localAgentImgRepository),
 			fmt.Sprintf("PORTER_AGENT_VERSION=%s", localAgentImgVersion),
 			"ACK_GINKGO_DEPRECATIONS=1.16.5",
@@ -337,7 +339,7 @@ func EnsureTestNamespace() {
 
 // Ensure ginkgo is installed.
 func EnsureGinkgo() {
-	mgx.Must(pkg.EnsurePackage("github.com/onsi/ginkgo/ginkgo", "1.16.5", ""))
+	mgx.Must(pkg.EnsurePackage("github.com/onsi/ginkgo/ginkgo", "1.16.5", "version"))
 }
 
 func setupTestNamespace() {
