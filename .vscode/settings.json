@@ -1,4 +1,8 @@
 {
   "remote.WSL.debug": true,
-  "terminal.integrated.shell.windows": "c:\\windows\\system32\\wsl.exe"
+  "terminal.integrated.shell.windows": "c:\\windows\\system32\\wsl.exe",
+  "go.buildFlags": [
+    "-tags=unit,integration"
+  ],
+  "go.testTags": "unit,integration"
 }
