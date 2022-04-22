@@ -14,6 +14,7 @@ replace (
 )
 
 require (
+	get.porter.sh/magefiles v0.2.2
 	get.porter.sh/porter v1.0.0-alpha.13
 	github.com/cnabio/cnab-go v0.23.1
 	github.com/hashicorp/go-hclog v1.0.0
@@ -28,7 +29,6 @@ require (
 )
 
 require (
-	get.porter.sh/magefiles v0.2.0
 	get.porter.sh/operator v0.5.0
 	github.com/carolynvs/magex v0.8.0
 	github.com/google/uuid v1.3.0
