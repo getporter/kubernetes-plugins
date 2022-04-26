@@ -17,13 +17,10 @@ variables:
 steps:
   - template: build-and-test.yml
 
-  - script: make build
-    workingDirectory: "$(System.DefaultWorkingDirectory)"
+  - script: mage XBuildAll
     displayName: "Build Release"
 
-  - script: |
-      make publish
+  - script: mage Publish
     env:
       GITHUB_TOKEN: $(GITHUB_TOKEN)
-    workingDirectory: "$(System.DefaultWorkingDirectory)"
     displayName: "Publish"

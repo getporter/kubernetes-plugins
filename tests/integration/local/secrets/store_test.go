@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package integration
 
 import (
@@ -29,6 +32,17 @@ func Test_Default_Namespace(t *testing.T) {
 		} else {
 			require.EqualError(t, err, "secrets \"test\" not found")
 		}
+	})
+}
+
+func Test_NoNamespace(t *testing.T) {
+	tc := portercontext.TestContext{}
+	k8sConfig := secrets.PluginConfig{Logger: logger}
+	store := secrets.NewStore(tc.Context, k8sConfig)
+	t.Run("Test No Namespace", func(t *testing.T) {
+		_, err := store.Resolve("secret", "test")
+		require.Error(t, err)
+		require.EqualError(t, err, "secrets \"test\" not found")
 	})
 }
 

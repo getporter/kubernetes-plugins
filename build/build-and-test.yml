@@ -4,16 +4,11 @@ steps:
       version: "$(GOVERSION)"
     displayName: "Install Go"
 
-  - script: |
-      set -xeuo pipefail
-      mkdir -p /home/vsts/go/bin/
-      echo "##vso[task.prependpath]/home/vsts/go/bin/"
-    displayName: "Configure Go"
+  - script: go run mage.go ConfigureAgent
+    displayName: "Configure Agent"
 
-  - script: make build
-    workingDirectory: "$(System.DefaultWorkingDirectory)"
+  - script: mage Build
     displayName: "Build"
 
-  - script: make test
-    workingDirectory: "$(System.DefaultWorkingDirectory)"
+  - script: mage Test
     displayName: "Test Unit and Integration"

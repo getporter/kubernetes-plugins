@@ -7,3 +7,4 @@
 .porter/
 kind.config
 coverage-integration.out
+build/git_askpass.sh
