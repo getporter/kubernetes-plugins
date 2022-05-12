@@ -10,9 +10,10 @@ import (
 
 	"get.porter.sh/plugin/kubernetes/pkg/kubernetes/secrets"
 	tests "get.porter.sh/plugin/kubernetes/tests/integration/local"
-	portercontext "get.porter.sh/porter/pkg/context"
+	"get.porter.sh/porter/pkg/portercontext"
 	hclog "github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/require"
+	v1 "k8s.io/api/core/v1"
 )
 
 var logger hclog.Logger = hclog.New(&hclog.LoggerOptions{
@@ -116,4 +117,33 @@ func Test_IncorrectSecretDataKey(t *testing.T) {
 		require.Equal(t, resolved, "")
 	})
 
+}
+
+func TestCreate_Secret(t *testing.T) {
+	nsName := tests.CreateNamespace(t)
+	k8sConfig := secrets.PluginConfig{
+		Namespace: nsName,
+		Logger:    logger,
+	}
+	tc := portercontext.TestContext{}
+	store := secrets.NewStore(tc.Context, k8sConfig)
+	defer tests.DeleteNamespace(t, nsName)
+
+	t.Run("success", func(t *testing.T) {
+		err := store.Create(context.Background(), secrets.SecretSourceType, "testkey", "testValue")
+		require.NoError(t, err)
+
+		resolved, err := store.Resolve(secrets.SecretSourceType, "testkey")
+		require.NoError(t, err)
+		require.Equal(t, "testvalue", resolved)
+	})
+
+	t.Run("exceeded maximum secret value size", func(t *testing.T) {
+		invalidValue := make([]byte, v1.MaxSecretSize+1)
+		err := store.Create(context.Background(), secrets.SecretSourceType, "testkey-max-secret-size", string(invalidValue))
+		require.Error(t, err)
+
+		_, err = store.Resolve(secrets.SecretSourceType, "testkey-max-secret-size")
+		require.Error(t, err)
+	})
 }

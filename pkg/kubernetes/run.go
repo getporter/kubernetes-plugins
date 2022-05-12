@@ -6,8 +6,8 @@ import (
 
 	"get.porter.sh/plugin/kubernetes/pkg/kubernetes/config"
 	"get.porter.sh/plugin/kubernetes/pkg/kubernetes/secrets"
-	portercontext "get.porter.sh/porter/pkg/context"
 	"get.porter.sh/porter/pkg/plugins"
+	"get.porter.sh/porter/pkg/portercontext"
 	"github.com/hashicorp/go-hclog"
 	hplugin "github.com/hashicorp/go-plugin"
 	"github.com/pkg/errors"
