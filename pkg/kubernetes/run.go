@@ -20,7 +20,7 @@ type RunOptions struct {
 }
 
 const (
-	PluginProtocolVersion uint = 1
+	PluginProtocolVersion = 1
 )
 
 func (o *RunOptions) Validate(args []string, cfg config.Config) error {
@@ -33,32 +33,21 @@ func (o *RunOptions) Validate(args []string, cfg config.Config) error {
 
 	o.Key = args[0]
 
-	availableImplementations := getPlugins(cfg)
+	availableImplementations := getPlugins()
 	selectedPlugin, ok := availableImplementations[o.Key]
 	if !ok {
 		return errors.Errorf("invalid plugin key specified: %q", o.Key)
 	}
-	o.selectedPlugin = selectedPlugin()
+	var err error
+	o.selectedPlugin, err = selectedPlugin(portercontext.New(), cfg)
+	if err != nil {
+		return err
+	}
 
 	parts := strings.Split(o.Key, ".")
 	o.selectedInterface = parts[0]
 
 	return nil
-}
-
-//TODO: implement our own Serve until porter/pkg/plugins supports protocolVersion
-// Serve a single named plugin.
-func Serve(interfaceName string, pluginImplementation hplugin.Plugin, protocolVersion uint) {
-	ServeMany(map[string]hplugin.Plugin{interfaceName: pluginImplementation}, protocolVersion)
-}
-
-// Serve many plugins that the client will select by named interface.
-func ServeMany(pluginMap map[string]hplugin.Plugin, protocolVersion uint) {
-	plugins.HandshakeConfig.ProtocolVersion = protocolVersion
-	hplugin.Serve(&hplugin.ServeConfig{
-		HandshakeConfig: plugins.HandshakeConfig,
-		Plugins:         pluginMap,
-	})
 }
 
 func (p *Plugin) Run(args []string) {
@@ -83,16 +72,15 @@ func (p *Plugin) Run(args []string) {
 		logger.Error(err.Error())
 		return
 	}
-	Serve(opts.selectedInterface, opts.selectedPlugin, PluginProtocolVersion)
+	logger.Debug("-------------ruuuunnnn")
+	plugins.Serve(p.Context, opts.selectedInterface, opts.selectedPlugin, PluginProtocolVersion)
 }
 
-func getPlugins(cfg config.Config) map[string]func() hplugin.Plugin {
-	cxt := portercontext.New()
-	secretPlugin, _ := secrets.NewPlugin(cxt, cfg)
+type pluginInitializer func(ctx *portercontext.Context, cfg config.Config) (hplugin.Plugin, error)
 
-	return map[string]func() hplugin.Plugin{
-		secrets.PluginKey: func() hplugin.Plugin {
-			return secretPlugin
-		},
+func getPlugins() map[string]pluginInitializer {
+
+	return map[string]pluginInitializer{
+		secrets.PluginKey: secrets.NewPlugin,
 	}
 }

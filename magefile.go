@@ -15,11 +15,13 @@ import (
 
 	"get.porter.sh/magefiles/ci"
 	"get.porter.sh/magefiles/docker"
+
 	// mage:import
 	_ "get.porter.sh/magefiles/docker"
 	"get.porter.sh/magefiles/porter"
 	"get.porter.sh/magefiles/releases"
 	"get.porter.sh/magefiles/tests"
+
 	// mage:import
 	_ "get.porter.sh/magefiles/tests"
 	"get.porter.sh/plugin/kubernetes/mage/setup"
