@@ -8,6 +8,7 @@ import (
 	"get.porter.sh/plugin/kubernetes/pkg/kubernetes/secrets"
 	"get.porter.sh/porter/pkg/plugins"
 	"get.porter.sh/porter/pkg/portercontext"
+	secretplugins "get.porter.sh/porter/pkg/secrets/plugins"
 	"github.com/hashicorp/go-hclog"
 	hplugin "github.com/hashicorp/go-plugin"
 	"github.com/pkg/errors"
@@ -18,10 +19,6 @@ type RunOptions struct {
 	selectedPlugin    hplugin.Plugin
 	selectedInterface string
 }
-
-const (
-	PluginProtocolVersion = 1
-)
 
 func (o *RunOptions) Validate(args []string, cfg config.Config) error {
 	if len(args) == 0 {
@@ -59,7 +56,7 @@ func (p *Plugin) Run(args []string) {
 		JSONFormat: true,
 	})
 	err := p.LoadConfig()
-	logger.Debug(fmt.Sprintf("Run.Plugin.Config.Namespace: %s", p.Config.Namespace))
+	logger.Debug(fmt.Sprintf("Run.Plugin.Config.Namespace: %s", p.Namespace))
 	if err != nil {
 		logger.Error(err.Error())
 		return
@@ -72,8 +69,7 @@ func (p *Plugin) Run(args []string) {
 		logger.Error(err.Error())
 		return
 	}
-	logger.Debug("-------------ruuuunnnn")
-	plugins.Serve(p.Context, opts.selectedInterface, opts.selectedPlugin, PluginProtocolVersion)
+	plugins.Serve(p.Context, opts.selectedInterface, opts.selectedPlugin, secretplugins.PluginProtocolVersion)
 }
 
 type pluginInitializer func(ctx *portercontext.Context, cfg config.Config) (hplugin.Plugin, error)

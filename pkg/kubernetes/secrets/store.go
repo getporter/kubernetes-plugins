@@ -78,7 +78,7 @@ func (s *Store) Resolve(ctx context.Context, keyName string, keyValue string) (s
 
 	secret, err := s.clientSet.CoreV1().Secrets(s.namespace).Get(ctx, key, metav1.GetOptions{})
 	if err != nil {
-		return "", log.Error(err)
+		return "", log.Error(fmt.Errorf("could not get secret %s: %w ", keyValue, err))
 	}
 	if val, ok := secret.Data[SecretDataKey]; !ok {
 		return "", log.Error(InvalidSecretDataKeyError{msg: fmt.Sprintf(`The secret %s/%s does not have a key named %s. `+
@@ -105,8 +105,6 @@ func (s *Store) Create(ctx context.Context, keyName string, keyValue string, val
 	}
 
 	byteValue := []byte(value)
-	// TODO: should we try to compress or segment the value so they can work
-	// with the limit?
 	if len(byteValue) > v1.MaxSecretSize {
 		return log.Error(fmt.Errorf("secret: %s exceeded the maximum secret size", key))
 	}

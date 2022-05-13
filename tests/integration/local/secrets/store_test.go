@@ -125,7 +125,7 @@ func TestCreate_Secret(t *testing.T) {
 		Namespace: nsName,
 		Logger:    logger,
 	}
-	tc := portercontext.TestContext{}
+	tc := portercontext.NewTestContext()
 	store := secrets.NewStore(tc.Context, k8sConfig)
 	defer tests.DeleteNamespace(t, nsName)
 

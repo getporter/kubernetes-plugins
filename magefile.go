@@ -142,7 +142,7 @@ func TestUnit() {
 }
 
 func Build() {
-	rebuild, err := target.Path(filepath.Join(binDir, "kubernetes"), srcDirs...)
+	rebuild, err := target.Dir(filepath.Join(binDir, "kubernetes"), srcDirs...)
 	if err != nil {
 		mgx.Must(fmt.Errorf("error inspecting source dirs %s: %w", srcDirs, err))
 	}
@@ -154,7 +154,7 @@ func Build() {
 }
 
 func XBuildAll() {
-	rebuild, err := target.Path(filepath.Join(binDir, "dev/kubernetes-linux-amd64"), srcDirs...)
+	rebuild, err := target.Dir(filepath.Join(binDir, "dev/kubernetes-linux-amd64"), srcDirs...)
 	if err != nil {
 		mgx.Must(fmt.Errorf("error inspecting source dirs %s: %w", srcDirs, err))
 	}
