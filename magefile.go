@@ -420,6 +420,7 @@ func buildPorterCmd(args ...string) shx.PreparedCommand {
 			fmt.Sprintf("PORTER_HOME=%s", filepath.Join(pwd(), "bin")))
 }
 
+// ensurePorter makes sure the specified version of porter is installed.
 func ensurePorter() {
 	porter.EnsurePorterAt(porterVersion)
 }
