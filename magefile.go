@@ -57,7 +57,7 @@ const (
 	operatorImage    = "porter-operator"
 	operatorRegistry = "ghcr.io/getporter"
 	// Porter version to use
-	porterVersion = "v1.0.0-alpha.19"
+	porterVersion = "canary-v1"
 	// Docker registry for porter client container
 	porterRegistry   = "ghcr.io/getporter"
 	porterConfigFile = "./tests/integration/operator/testdata/operator_porter_config.yaml"
@@ -412,12 +412,16 @@ func kubectl(args ...string) shx.PreparedCommand {
 
 // Run porter using the local storage, not the in-cluster storage
 func buildPorterCmd(args ...string) shx.PreparedCommand {
-	mg.SerialDeps(porter.UseBinForPorterHome, porter.EnsurePorter, setup.InstallMixins)
+	mg.SerialDeps(porter.UseBinForPorterHome, ensurePorter, setup.InstallMixins)
 
 	return must.Command(filepath.Join(pwd(), "bin/porter")).Args(args...).
 		Env("PORTER_DEFAULT_STORAGE=",
 			"PORTER_DEFAULT_STORAGE_PLUGIN=mongodb-docker",
 			fmt.Sprintf("PORTER_HOME=%s", filepath.Join(pwd(), "bin")))
+}
+
+func ensurePorter() {
+	porter.EnsurePorterAt(porterVersion)
 }
 
 func PublishLocalPorterAgent() {
