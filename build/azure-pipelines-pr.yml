@@ -1,5 +1,5 @@
 pr:
-  - main
+  autoCancel: true
 
 trigger: none
 
