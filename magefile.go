@@ -340,7 +340,6 @@ func EnsureGinkgo() {
 func setupTestNamespace() {
 	SetupNamespace(testNamespace)
 	EnsureTestSecret()
-	SetupTestCredentialSet()
 }
 
 func namespaceExists(name string) bool {
@@ -396,10 +395,6 @@ func testSecretExists() bool {
 }
 func setupTestSecret() {
 	kubectl("create", "secret", "generic", "password", "--from-literal=value=test", "-n", testNamespace).Must(false).Run()
-}
-
-func SetupTestCredentialSet() {
-	kubectl("-n", testNamespace, "apply", "-f", "./tests/integration/operator/testdata/agent_action_create_password_creds.yaml").Must(false).Run()
 }
 
 func TestInstallation() {
