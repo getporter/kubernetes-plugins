@@ -173,7 +173,7 @@ func TestLocalIntegration() {
 
 	ctx, _ := kubectl("config", "current-context").OutputV()
 	testLocalIntegration()
-	must.RunV("go", "test", "-v", "./tests/integration/local/...")
+	must.RunV("go", "test", "-v", "-tags=integration", "./tests/integration/local/...")
 	if ctx != "" {
 		kubectl("config", "use-context", ctx).RunV()
 	}

@@ -111,7 +111,7 @@ func (s *Store) Create(ctx context.Context, keyName string, keyValue string, val
 
 	Immutable := true
 	data := map[string][]byte{
-		key: byteValue,
+		SecretDataKey: byteValue,
 	}
 	secret := &v1.Secret{ObjectMeta: metav1.ObjectMeta{Name: keyValue}, Immutable: &Immutable, Data: data}
 	_, err := s.clientSet.CoreV1().Secrets(s.namespace).Create(ctx, secret, metav1.CreateOptions{})
