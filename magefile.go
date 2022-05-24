@@ -15,11 +15,13 @@ import (
 
 	"get.porter.sh/magefiles/ci"
 	"get.porter.sh/magefiles/docker"
+
 	// mage:import
 	_ "get.porter.sh/magefiles/docker"
 	"get.porter.sh/magefiles/porter"
 	"get.porter.sh/magefiles/releases"
 	"get.porter.sh/magefiles/tests"
+
 	// mage:import
 	_ "get.porter.sh/magefiles/tests"
 	"get.porter.sh/plugin/kubernetes/mage/setup"
@@ -55,7 +57,7 @@ const (
 	operatorImage    = "porter-operator"
 	operatorRegistry = "ghcr.io/getporter"
 	// Porter version to use
-	porterVersion = "v1.0.0-alpha.19"
+	porterVersion = "canary-v1"
 	// Docker registry for porter client container
 	porterRegistry   = "ghcr.io/getporter"
 	porterConfigFile = "./tests/integration/operator/testdata/operator_porter_config.yaml"
@@ -140,7 +142,7 @@ func TestUnit() {
 }
 
 func Build() {
-	rebuild, err := target.Path(filepath.Join(binDir, "kubernetes"), srcDirs...)
+	rebuild, err := target.Dir(filepath.Join(binDir, "kubernetes"), srcDirs...)
 	if err != nil {
 		mgx.Must(fmt.Errorf("error inspecting source dirs %s: %w", srcDirs, err))
 	}
@@ -152,7 +154,7 @@ func Build() {
 }
 
 func XBuildAll() {
-	rebuild, err := target.Path(filepath.Join(binDir, "dev/kubernetes-linux-amd64"), srcDirs...)
+	rebuild, err := target.Dir(filepath.Join(binDir, "dev/kubernetes-linux-amd64"), srcDirs...)
 	if err != nil {
 		mgx.Must(fmt.Errorf("error inspecting source dirs %s: %w", srcDirs, err))
 	}
@@ -171,7 +173,7 @@ func TestLocalIntegration() {
 
 	ctx, _ := kubectl("config", "current-context").OutputV()
 	testLocalIntegration()
-	must.RunV("go", "test", "-v", "./tests/integration/local/...")
+	must.RunV("go", "test", "-v", "-tags=integration", "./tests/integration/local/...")
 	if ctx != "" {
 		kubectl("config", "use-context", ctx).RunV()
 	}
@@ -194,8 +196,11 @@ func testLocalIntegration() {
 
 // Run integration tests against the test cluster.
 func TestIntegration() {
-	mg.Deps(XBuildAll, EnsureGinkgo)
+	mg.Deps(XBuildAll, EnsureGinkgo, CleanTestdata)
 	mg.Deps(EnsureTestNamespace)
+	defer func() {
+		CleanTestdata()
+	}()
 
 	if os.Getenv("PORTER_AGENT_REPOSITORY") != "" && os.Getenv("PORTER_AGENT_VERSION") != "" {
 		localAgentImgRepository = os.Getenv("PORTER_AGENT_REPOSITORY")
@@ -335,7 +340,6 @@ func EnsureGinkgo() {
 func setupTestNamespace() {
 	SetupNamespace(testNamespace)
 	EnsureTestSecret()
-	SetupTestCredentialSet()
 }
 
 func namespaceExists(name string) bool {
@@ -393,10 +397,6 @@ func setupTestSecret() {
 	kubectl("create", "secret", "generic", "password", "--from-literal=value=test", "-n", testNamespace).Must(false).Run()
 }
 
-func SetupTestCredentialSet() {
-	kubectl("-n", testNamespace, "apply", "-f", "./tests/integration/operator/testdata/agent_action_create_password_creds.yaml").Must(false).Run()
-}
-
 func TestInstallation() {
 	kubectl("-n", testNamespace, "create", "-f", "./tests/integration/operator/testdata/porter-test-me.yaml").Must(false).Run()
 }
@@ -410,12 +410,17 @@ func kubectl(args ...string) shx.PreparedCommand {
 
 // Run porter using the local storage, not the in-cluster storage
 func buildPorterCmd(args ...string) shx.PreparedCommand {
-	mg.SerialDeps(porter.UseBinForPorterHome, porter.EnsurePorter, setup.InstallMixins)
+	mg.SerialDeps(porter.UseBinForPorterHome, ensurePorter, setup.InstallMixins)
 
 	return must.Command(filepath.Join(pwd(), "bin/porter")).Args(args...).
 		Env("PORTER_DEFAULT_STORAGE=",
 			"PORTER_DEFAULT_STORAGE_PLUGIN=mongodb-docker",
 			fmt.Sprintf("PORTER_HOME=%s", filepath.Join(pwd(), "bin")))
+}
+
+// ensurePorter makes sure the specified version of porter is installed.
+func ensurePorter() {
+	porter.EnsurePorterAt(porterVersion)
 }
 
 func PublishLocalPorterAgent() {

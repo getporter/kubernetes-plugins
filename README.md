@@ -39,7 +39,7 @@ porter invoke porterops --action configureNamespace --param namespace=quickstart
 
 ### Secrets
 
-The `kubernetes.secrets` plugin enables resolution of credential or parameter values as secrets in Kubernetes via the Porter Operator.
+The `kubernetes.secrets` plugin enables resolution of credential or parameter values and storing sensitive data(parameter or output values) as secrets in Kubernetes via the Porter Operator.
 
 1. Create, `./porter-k8s-config.yaml`
 1. Add the following lines1:

@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"get.porter.sh/plugin/kubernetes/pkg/kubernetes/config"
-	portercontext "get.porter.sh/porter/pkg/context"
+	"get.porter.sh/porter/pkg/portercontext"
 	"get.porter.sh/porter/pkg/secrets"
 	"get.porter.sh/porter/pkg/secrets/plugins"
-	cnabsecrets "github.com/cnabio/cnab-go/secrets"
+	"get.porter.sh/porter/pkg/secrets/pluginstore"
 	"github.com/hashicorp/go-hclog"
 	hplugin "github.com/hashicorp/go-plugin"
 	"github.com/mitchellh/mapstructure"
@@ -16,7 +16,7 @@ import (
 
 const PluginKey = plugins.PluginInterface + ".kubernetes.secrets"
 
-var _ cnabsecrets.Store = &Plugin{}
+var _ plugins.SecretsProtocol = &Plugin{}
 
 type PluginConfig struct {
 	Namespace string `mapstructure:"namespace"`
@@ -24,7 +24,7 @@ type PluginConfig struct {
 }
 
 type Plugin struct {
-	cnabsecrets.Store
+	secrets.Store
 }
 
 func NewPlugin(cxt *portercontext.Context, pluginConfig config.Config) (hplugin.Plugin, error) {
@@ -39,9 +39,5 @@ func NewPlugin(cxt *portercontext.Context, pluginConfig config.Config) (hplugin.
 	if err := mapstructure.Decode(pluginConfig, &cfg); err != nil {
 		return nil, errors.Wrapf(err, "error decoding %s plugin config from %#v", PluginKey, pluginConfig)
 	}
-	return &secrets.Plugin{
-		Impl: &Plugin{
-			Store: NewStore(cxt, cfg),
-		},
-	}, nil
+	return pluginstore.NewPlugin(cxt, NewStore(cxt, cfg)), nil
 }
