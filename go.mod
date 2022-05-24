@@ -33,7 +33,7 @@ require (
 )
 
 require (
-	get.porter.sh/operator v0.5.0
+	get.porter.sh/operator v0.5.3
 	github.com/carolynvs/magex v0.8.0
 	github.com/google/uuid v1.3.0
 	github.com/magefile/mage v1.13.0
@@ -41,7 +41,7 @@ require (
 	github.com/onsi/gomega v1.19.0
 	github.com/tidwall/pretty v1.0.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	k8s.io/utils v0.0.0-20211116205334-6203023598ed
+	k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
 	sigs.k8s.io/controller-runtime v0.11.2
 )
 
@@ -49,14 +49,14 @@ require (
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/PuerkitoBio/goquery v1.5.0 // indirect
-	github.com/andybalholm/brotli v1.0.0 // indirect
+	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/andybalholm/cascadia v1.0.0 // indirect
 	github.com/carolynvs/aferox v0.3.0 // indirect
 	github.com/cbroglie/mustache v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/cyberphone/json-canonicalization v0.0.0-20210303052042-6bc126869bf4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dsnet/compress v0.0.1 // indirect
+	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
@@ -65,7 +65,7 @@ require (
 	github.com/go-logr/zapr v1.2.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/golang/snappy v0.0.4-0.20210608040537-544b4180ac70 // indirect
+	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/googleapis/gnostic v0.5.5 // indirect
@@ -80,19 +80,19 @@ require (
 	github.com/jeremywohl/flatten v1.0.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.15.1 // indirect
-	github.com/klauspost/pgzip v1.2.4 // indirect
+	github.com/klauspost/pgzip v1.2.5 // indirect
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/magiconair/properties v1.8.1 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
-	github.com/mholt/archiver/v3 v3.5.0 // indirect
+	github.com/mholt/archiver/v3 v3.5.1 // indirect
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
 	github.com/mmcdole/gofeed v1.0.0-beta2 // indirect
 	github.com/mmcdole/goxpp v0.0.0-20181012175147-0068e33feabf // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/nwaples/rardecode v1.1.0 // indirect
+	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
@@ -101,19 +101,19 @@ require (
 	github.com/osteele/liquid v1.3.0 // indirect
 	github.com/osteele/tuesday v1.0.3 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
-	github.com/pierrec/lz4/v4 v4.0.3 // indirect
+	github.com/pierrec/lz4/v4 v4.1.14 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/qri-io/jsonpointer v0.1.1 // indirect
 	github.com/qri-io/jsonschema v0.2.2-0.20210831022256-780655b2ba0e // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/smartystreets/assertions v1.0.0 // indirect
-	github.com/spf13/afero v1.5.1 // indirect
+	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.8.1 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
-	github.com/ulikunitz/xz v0.5.7 // indirect
+	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
