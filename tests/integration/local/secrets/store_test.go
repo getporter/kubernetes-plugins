@@ -139,6 +139,15 @@ func TestCreate_Secret(t *testing.T) {
 		require.Equal(t, "testValue", resolved)
 	})
 
+	t.Run("secret key should be all lowercase", func(t *testing.T) {
+		err := store.Create(context.Background(), secrets.SecretSourceType, "UPPERCASE-test", "testValue")
+		require.Error(t, err)
+
+		resolved, err = store.Resolve(context.Background(), secrets.SecretSourceType, "uppercase-test")
+		require.Error(t, err)
+		require.Equal(t, "testValue", resolved)
+	})
+
 	t.Run("exceeded maximum secret value size", func(t *testing.T) {
 		invalidValue := make([]byte, v1.MaxSecretSize+1)
 		err := store.Create(context.Background(), secrets.SecretSourceType, "testkey-max-secret-size", string(invalidValue))

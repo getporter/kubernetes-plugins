@@ -98,8 +98,9 @@ func (s *Store) Create(ctx context.Context, keyName string, keyValue string, val
 		return err
 	}
 
-	key := strings.ToLower(keyName)
 	s.logger.Debug(fmt.Sprintf("Store.Create: ns:%s, keyName:%s, keyValue:%s", s.namespace, keyName, keyValue))
+
+	key := strings.ToLower(keyName)
 	if key != SecretSourceType {
 		return log.Error(fmt.Errorf("unsupported secret type: %s. Only %s is supported", keyName, SecretSourceType))
 	}
@@ -113,7 +114,7 @@ func (s *Store) Create(ctx context.Context, keyName string, keyValue string, val
 	data := map[string][]byte{
 		SecretDataKey: byteValue,
 	}
-	secret := &v1.Secret{ObjectMeta: metav1.ObjectMeta{Name: keyValue}, Immutable: &Immutable, Data: data}
+	secret := &v1.Secret{ObjectMeta: metav1.ObjectMeta{Name: strings.ToLower(keyValue)}, Immutable: &Immutable, Data: data}
 	_, err := s.clientSet.CoreV1().Secrets(s.namespace).Create(ctx, secret, metav1.CreateOptions{})
 	return log.Error(err)
 }
