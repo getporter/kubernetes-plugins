@@ -18,7 +18,7 @@ replace (
 )
 
 require (
-	get.porter.sh/magefiles v0.2.2
+	get.porter.sh/magefiles v0.2.3
 	get.porter.sh/porter v1.0.0-alpha.19.0.20220519145811-23393bfc2dec
 	github.com/cnabio/cnab-go v0.23.2
 	github.com/hashicorp/go-hclog v1.0.0
