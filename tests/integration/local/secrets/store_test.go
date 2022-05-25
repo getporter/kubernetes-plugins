@@ -143,7 +143,7 @@ func TestCreate_Secret(t *testing.T) {
 		err := store.Create(context.Background(), secrets.SecretSourceType, "UPPERCASE-test", "testValue")
 		require.Error(t, err)
 
-		resolved, err = store.Resolve(context.Background(), secrets.SecretSourceType, "uppercase-test")
+		resolved, err := store.Resolve(context.Background(), secrets.SecretSourceType, "uppercase-test")
 		require.Error(t, err)
 		require.Equal(t, "testValue", resolved)
 	})

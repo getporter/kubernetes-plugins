@@ -196,11 +196,8 @@ func testLocalIntegration() {
 
 // Run integration tests against the test cluster.
 func TestIntegration() {
-	mg.Deps(XBuildAll, EnsureGinkgo, CleanTestdata)
+	mg.Deps(CleanTestdata, XBuildAll, EnsureGinkgo)
 	mg.Deps(EnsureTestNamespace)
-	defer func() {
-		CleanTestdata()
-	}()
 
 	if os.Getenv("PORTER_AGENT_REPOSITORY") != "" && os.Getenv("PORTER_AGENT_VERSION") != "" {
 		localAgentImgRepository = os.Getenv("PORTER_AGENT_REPOSITORY")

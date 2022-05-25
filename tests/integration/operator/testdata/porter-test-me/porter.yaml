@@ -1,0 +1,101 @@
+# This is the configuration for Porter
+# You must define steps for each action, but the rest is optional
+# See https://porter.sh/author-bundles for documentation on how to configure your bundle
+# Uncomment out the sections below to take full advantage of what Porter can do!
+
+schemaVersion: 1.0.0-alpha.1
+name: porter-test-me
+version: 0.1.0
+description: "Porter bundle with test behaviors"
+registry: ghcr.io/vinozzz
+
+# If you want to customize the Dockerfile in use, uncomment the line below and update the referenced file.
+# See https://porter.sh/custom-dockerfile/
+dockerfile: Dockerfile.tmpl
+
+mixins:
+  - exec
+
+# Below is an example of how to define credentials
+# See https://porter.sh/author-bundles/#credentials
+credentials:
+  - name: insecureValue
+    description: insecure test credential
+    env: INSECURE_VALUE
+    required: false
+
+# Below is an example of how to define parameters
+# See https://porter.sh/author-bundles/#parameters
+parameters:
+  - name: exitStatus
+    description: control exit status code
+    type: integer
+    default: 0
+    minimum: 0
+
+  - name: delay
+    description: sleep (in seconds) before exiting
+    type: integer
+    default: 0
+    minimum: 0
+
+  - name: password
+    description: super secret password
+    type: string
+    default: default-value
+    sensitive: true
+
+outputs:
+  - name: outAction
+    description: bundle action
+    type: string
+  - name: outDelay
+    description: delay parameter value
+    type: integer
+  - name: outExitStatus
+    description: exitStatus parameter value
+    type: integer
+  - name: outInsecureValue
+    description: insecureValue secret value
+    type: string
+  - name: outSecureValue
+    description: secureValue secret value
+    type: string
+    sensitive: true
+
+install:
+  - exec:
+      description: "test install"
+      command: ./test-me.sh
+      arguments:
+        - install
+        - "{{ bundle.parameters.delay }}"
+        - "{{ bundle.parameters.exitStatus }}"
+        - "{{ bundle.parameters.password }}"
+      outputs:
+        - name: outAction
+          jsonPath: "$.config.action"
+        - name: outDelay
+          jsonPath: "$.config.parameters.delay"
+        - name: outExitStatus
+          jsonPath: "$.config.parameters.exitStatus"
+        - name: outSecureValue
+          jsonPath: "$.config.parameters.password"
+        - name: outInsecureValue
+          jsonPath: "$.credentials.insecureValue"
+
+uninstall:
+  - exec:
+      description: "test uninstall"
+      command: ./test-me.sh
+      arguments:
+        - uninstall
+        - "{{ bundle.parameters.delay }}"
+        - "{{ bundle.parameters.exitStatus }}"
+      outputs:
+        - name: outAction
+          jsonPath: "$.config.action"
+        - name: outDelay
+          jsonPath: "$.config.parameters.delay"
+        - name: outExitStatus
+          jsonPath: "$.config.parameters.exitStatus"
