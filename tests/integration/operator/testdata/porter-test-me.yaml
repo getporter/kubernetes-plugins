@@ -7,7 +7,7 @@ spec:
   namespace: dev
   name: foo2
   bundle:
-    repository: ghcr.io/vinozzz/porter-test-me
+    repository: ghcr.io/getporter/test/kubernetes-plugin
     version: 0.1.0
   parameters:
     delay: 0

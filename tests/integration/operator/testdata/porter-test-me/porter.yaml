@@ -4,10 +4,10 @@
 # Uncomment out the sections below to take full advantage of what Porter can do!
 
 schemaVersion: 1.0.0-alpha.1
-name: porter-test-me
+name: kubernetes-plugin
 version: 0.1.0
 description: "Porter bundle with test behaviors"
-registry: ghcr.io/vinozzz
+registry: ghcr.io/getporter/test
 
 # If you want to customize the Dockerfile in use, uncomment the line below and update the referenced file.
 # See https://porter.sh/custom-dockerfile/

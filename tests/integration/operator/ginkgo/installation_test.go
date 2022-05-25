@@ -304,7 +304,7 @@ func NewInstallation(installationName, installationNamespace string) *porterv1.I
 			Name:          installationName,
 			Namespace:     installationNamespace,
 			Bundle: porterv1.OCIReferenceParts{
-				Repository: "ghcr.io/vinozzz/porter-test-me",
+				Repository: "ghcr.io/getporter/test/kubernetes-plugin",
 				Version:    "0.1.0",
 			},
 			Parameters:     runtime.RawExtension{Raw: []byte("{\"delay\": \"1\", \"exitStatus\": \"0\"}")},
