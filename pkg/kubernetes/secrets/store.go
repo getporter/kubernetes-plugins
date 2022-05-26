@@ -127,7 +127,7 @@ func SanitizeKey(v string) string {
 	key := strings.ToLower(v)
 	// replace non-alphanumeric characters at the beginning and the end of the string
 	startEndReg := regexp.MustCompile(`^[^a-z0-9]|[^a-z0-9]$`)
-	firstPass := startEndReg.ReplaceAllString(key, "sanitized")
+	firstPass := startEndReg.ReplaceAllString(key, "000")
 	// replace non-alphanumeric characters except `-` and `.` in the string
 	characterReg := regexp.MustCompile(`[^a-z0-9-.]+`)
 	return characterReg.ReplaceAllString(firstPass, "-")

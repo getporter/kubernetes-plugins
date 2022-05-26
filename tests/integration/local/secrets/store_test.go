@@ -139,7 +139,7 @@ func TestCreate_Secret(t *testing.T) {
 		require.Equal(t, "testValue", resolved)
 	})
 
-	t.Run("secret key should be converted to follow RFC 1123 subdomain with all lowercase characters", func(t *testing.T) {
+	t.Run("successfully store a secret that doesn't match the secret key naming requirements", func(t *testing.T) {
 		err := store.Create(context.Background(), secrets.SecretSourceType, "-UPPERCA_SE-test-", "testValue")
 		require.NoError(t, err)
 
