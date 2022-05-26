@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	porterv1 "get.porter.sh/operator/api/v1"
@@ -38,8 +39,8 @@ var _ = Describe("Porter using default secrets plugin config", func() {
 			installationName := fmt.Sprintf("default-plugin-%v", randId)
 			ns := createTestNamespace(context.Background())
 			ctx := context.Background()
-			createSecret(ns, secrets.SecretDataKey, "password", "test")
-			credSet := NewCredSet("test", "insecureValue", "password")
+			createSecret(ns, secrets.SecretDataKey, "cred-password", "test")
+			credSet := NewCredSet("test", "insecureValue", "cred-password")
 			agentAction := createCredentialSetAgentAction(ns, credSet)
 			pollAA := func() bool { return agentActionPoll(agentAction) }
 			Eventually(pollAA, time.Second*120, time.Second*3).Should(BeTrue())
@@ -64,8 +65,8 @@ var _ = Describe("Porter using default secrets plugin config", func() {
 			installationName := fmt.Sprintf("default-plugin-%v", randId)
 			installationNs := createTestNamespace(ctx)
 			secretsNs := createTestNamespace(ctx)
-			createSecret(secretsNs, secrets.SecretDataKey, "password", "test")
-			credSet := NewCredSet("test", "insecureValue", "password")
+			createSecret(secretsNs, secrets.SecretDataKey, "cred-password", "test")
+			credSet := NewCredSet("test", "insecureValue", "cred-password")
 			agentAction := createCredentialSetAgentAction(installationNs, credSet)
 			pollAA := func() bool { return agentActionPoll(agentAction) }
 			Eventually(pollAA, time.Second*120, time.Second*3).Should(BeTrue())
@@ -89,8 +90,8 @@ var _ = Describe("Porter using default secrets plugin config", func() {
 			ctx := context.Background()
 			installationName := fmt.Sprintf("default-plugin-%v", randId)
 			installationNs := createTestNamespace(ctx)
-			createSecret(installationNs, "invalidKey", "password", "test")
-			credSet := NewCredSet("test", "insecureValue", "password")
+			createSecret(installationNs, "invalidKey", "cred-password", "test")
+			credSet := NewCredSet("test", "insecureValue", "cred-password")
 			agentAction := createCredentialSetAgentAction(installationNs, credSet)
 			pollAA := func() bool { return agentActionPoll(agentAction) }
 			Eventually(pollAA, time.Second*120, time.Second*3).Should(BeTrue())
@@ -119,13 +120,13 @@ var _ = Describe("Porter using a secrets plugin config that doesn't specify the 
 			defaultSecretsCfgName := "kubernetes-secrets"
 			ns := createTestNamespace(context.Background())
 			ctx := context.Background()
-			createSecret(ns, secrets.SecretDataKey, "password", "test")
+			createSecret(ns, secrets.SecretDataKey, "cred-password", "test")
 			porterCfg := NewPorterConfig(ns)
 			k8sSecretsCfg := NewSecretsPluginConfig(defaultSecretsCfgName, nil)
 			SetPorterConfigSecrets(porterCfg, k8sSecretsCfg)
 			porterCfg.Spec.DefaultSecrets = pointer.String(defaultSecretsCfgName)
 			Expect(k8sClient.Create(context.Background(), porterCfg)).Should(Succeed())
-			credSet := NewCredSet("test", "insecureValue", "password")
+			credSet := NewCredSet("test", "insecureValue", "cred-password")
 			agentAction := createCredentialSetAgentAction(ns, credSet)
 			pollAA := func() bool { return agentActionPoll(agentAction) }
 			Eventually(pollAA, time.Second*120, time.Second*3).Should(BeTrue())
@@ -158,7 +159,7 @@ var _ = Describe("Porter using secrets plugin configured using same namespace as
 			installationName := fmt.Sprintf("porter-hello-%v", randId)
 			ns := createTestNamespace(context.Background())
 			ctx := context.Background()
-			createSecret(ns, secrets.SecretDataKey, "password", "test")
+			createSecret(ns, secrets.SecretDataKey, "cred-password", "test")
 			defaultSecretsCfgName := "kubernetes-secrets"
 			porterCfg := NewPorterConfig(ns)
 			secretsNamespaceCfg := &SecretsConfig{Namespace: ns}
@@ -166,7 +167,7 @@ var _ = Describe("Porter using secrets plugin configured using same namespace as
 			SetPorterConfigSecrets(porterCfg, k8sSecretsCfg)
 			porterCfg.Spec.DefaultSecrets = pointer.String(defaultSecretsCfgName)
 			Expect(k8sClient.Create(context.Background(), porterCfg)).Should(Succeed())
-			credSet := NewCredSet("test", "insecureValue", "password")
+			credSet := NewCredSet("test", "insecureValue", "cred-password")
 			agentAction := createCredentialSetAgentAction(ns, credSet)
 			pollAA := func() bool { return agentActionPoll(agentAction) }
 			Eventually(pollAA, time.Second*120, time.Second*3).Should(BeTrue())
@@ -184,6 +185,53 @@ var _ = Describe("Porter using secrets plugin configured using same namespace as
 			validateInstallStatus(inst, porterv1.PhaseSucceeded)
 		})
 	})
+
+	When("applying an Installation with a sensitive parameter in the Installation namespace", func() {
+		It("successfully installs", func() {
+			By("storing secrets in the kubernetes secret")
+			randId := uuid.New()
+			installationName := fmt.Sprintf("porter-hello-secret-%v", randId)
+			ns := createTestNamespace(context.Background())
+			ctx := context.Background()
+			createSecret(ns, secrets.SecretDataKey, "cred-test", "test")
+			defaultSecretsCfgName := "kubernetes-secrets"
+			porterCfg := NewPorterConfig(ns)
+			secretsNamespaceCfg := &SecretsConfig{Namespace: ns}
+			k8sSecretsCfg := NewSecretsPluginConfig(defaultSecretsCfgName, secretsNamespaceCfg)
+			SetPorterConfigSecrets(porterCfg, k8sSecretsCfg)
+			porterCfg.Spec.DefaultSecrets = pointer.String(defaultSecretsCfgName)
+			Expect(k8sClient.Create(context.Background(), porterCfg)).Should(Succeed())
+			credSet := NewCredSet("test", "insecureValue", "cred-test")
+			agentAction := createCredentialSetAgentAction(ns, credSet)
+			pollAA := func() bool { return agentActionPoll(agentAction) }
+			Eventually(pollAA, time.Second*120, time.Second*3).Should(BeTrue())
+			inst := NewInstallation(installationName, ns)
+			inst.Spec.Parameters = runtime.RawExtension{Raw: []byte("{\"delay\": \"1\", \"exitStatus\": \"0\", \"password\": \"super-secret\"}")}
+			Expect(k8sClient.Create(ctx, inst)).Should(Succeed())
+
+			// Wait for the job to be created
+			installations := waitForInstallationStarted(ctx, ns, installationName)
+			installation := installations.Items[0]
+
+			// Validate that the job succeeded
+			installation = waitForInstallationFinished(ctx, installation)
+
+			// Validate that the installation status was updated
+			validateInstallStatus(inst, porterv1.PhaseSucceeded)
+			secretList := &corev1.SecretList{}
+			Expect(k8sClient.List(ctx, secretList, client.InNamespace(ns))).Should(Succeed())
+			var found bool
+			for _, s := range secretList.Items {
+				if !strings.Contains(s.ObjectMeta.Name, "password") {
+					continue
+				}
+				if value, ok := s.Data[secrets.SecretDataKey]; ok {
+					found = string(value) == "super-secret"
+				}
+			}
+			Expect(found).Should(BeTrue())
+		})
+	})
 })
 
 var _ = Describe("Porter k8s secrets plugin configured using a different namespace than the Installation resource", func() {
@@ -195,7 +243,7 @@ var _ = Describe("Porter k8s secrets plugin configured using a different namespa
 			installNamespace := createTestNamespace(context.Background())
 			secretNamespace := createTestNamespace(context.Background())
 			ctx := context.Background()
-			var defaultSecretsCfgName, secretName, secretValue, credSetName = "kubernetes-secrets", "password", "test", "test"
+			var defaultSecretsCfgName, secretName, secretValue, credSetName = "kubernetes-secrets", "cred-password", "test", "test"
 			createSecret(secretNamespace, secrets.SecretDataKey, secretName, secretValue)
 			porterCfg := NewPorterConfig(installNamespace)
 			secretsNamespaceCfg := &SecretsConfig{Namespace: secretNamespace}
@@ -256,8 +304,8 @@ func NewInstallation(installationName, installationNamespace string) *porterv1.I
 			Name:          installationName,
 			Namespace:     installationNamespace,
 			Bundle: porterv1.OCIReferenceParts{
-				Repository: "ghcr.io/bdegeeter/porter-test-me",
-				Version:    "0.2.0",
+				Repository: "ghcr.io/getporter/test/kubernetes-plugin",
+				Version:    "0.1.0",
 			},
 			Parameters:     runtime.RawExtension{Raw: []byte("{\"delay\": \"1\", \"exitStatus\": \"0\"}")},
 			CredentialSets: []string{"test"},
