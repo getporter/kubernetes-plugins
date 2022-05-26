@@ -3,6 +3,7 @@ package secrets
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 
 	k8shelper "get.porter.sh/plugin/kubernetes/pkg/kubernetes/helper"
@@ -74,7 +75,7 @@ func (s *Store) Resolve(ctx context.Context, keyName string, keyValue string) (s
 		return s.hostStore.Resolve(keyName, keyValue)
 	}
 	s.logger.Debug(fmt.Sprintf("Store.Resolve: ns:%s, keyName:%s, keyValue:%s", s.namespace, keyName, keyValue))
-	key := strings.ToLower(keyValue)
+	key := SanitizeKey(keyValue)
 
 	secret, err := s.clientSet.CoreV1().Secrets(s.namespace).Get(ctx, key, metav1.GetOptions{})
 	if err != nil {
@@ -114,7 +115,20 @@ func (s *Store) Create(ctx context.Context, keyName string, keyValue string, val
 	data := map[string][]byte{
 		SecretDataKey: byteValue,
 	}
-	secret := &v1.Secret{ObjectMeta: metav1.ObjectMeta{Name: strings.ToLower(keyValue)}, Immutable: &Immutable, Data: data}
+	secret := &v1.Secret{ObjectMeta: metav1.ObjectMeta{Name: SanitizeKey(keyValue)}, Immutable: &Immutable, Data: data}
 	_, err := s.clientSet.CoreV1().Secrets(s.namespace).Create(ctx, secret, metav1.CreateOptions{})
 	return log.Error(err)
+}
+
+// SanitizeKey converts a string to follow below rules:
+// 1. only contains lower case alphanumeric characters, '-' or '.'
+// 2. must start and end with an alphanumeric character
+func SanitizeKey(v string) string {
+	key := strings.ToLower(v)
+	// replace non-alphanumeric characters at the beginning and the end of the string
+	startEndReg := regexp.MustCompile(`^[^a-z0-9]|[^a-z0-9]$`)
+	firstPass := startEndReg.ReplaceAllString(key, "sanitized")
+	// replace non-alphanumeric characters except `-` and `.` in the string
+	characterReg := regexp.MustCompile(`[^a-z0-9-.]+`)
+	return characterReg.ReplaceAllString(firstPass, "-")
 }
