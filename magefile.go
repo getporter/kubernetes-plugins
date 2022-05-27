@@ -4,12 +4,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -61,13 +62,15 @@ const (
 	// Docker registry for porter client container
 	porterRegistry   = "ghcr.io/getporter"
 	porterConfigFile = "./tests/integration/operator/testdata/operator_porter_config.yaml"
+
+	// The root package name of the plugin repository
+	pluginPkg = "get.porter.sh/plugin/kubernetes"
 )
 
 // Dirs to watch recursively for build target
 var (
 	srcDirs             = []string{"cmd/", "pkg/", "go.mod", "magefile.go"}
 	binDir              = "bin/plugins/kubernetes/"
-	pluginPkg           = fmt.Sprintf("./cmd/%s", pluginName)
 	supportedClientGOOS = []string{"linux", "darwin", "windows"}
 	// number of nodes for ginkgo parallel test execution (1=sequential)
 	ginkgoNodes = "1"
@@ -165,6 +168,25 @@ func XBuildAll() {
 	}
 
 	releases.PreparePluginForPublish(pluginName)
+	verifyVersionStamp()
+}
+
+// verifyVersionStamp checks that the version was set on the cross-compiled binaries
+func verifyVersionStamp() {
+	// When this test fails, pluginPkg is set incorrectly or not passed to the releases functions properly
+	pluginBinaryPath := filepath.Join(binDir, fmt.Sprintf("dev/kubernetes-%s-amd64", runtime.GOOS))
+	versionOutput, _ := must.OutputV(pluginBinaryPath, "version", "-o=json")
+
+	var raw map[string]interface{}
+	if err := json.Unmarshal([]byte(versionOutput), &raw); err != nil {
+		mgx.Must(fmt.Errorf("error parsing the version command output as json: %w", err))
+	}
+
+	meta := releases.LoadMetadata()
+	gotVersion := raw["version"].(string)
+	if gotVersion != meta.Version {
+		mgx.Must(fmt.Errorf("the version was not set correctly on the kubernetes plugin binary %s: expected %q got %q", pluginBinaryPath, meta.Version, gotVersion))
+	}
 }
 
 // Run local integration tests against the test cluster.
