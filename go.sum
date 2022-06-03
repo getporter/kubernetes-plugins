@@ -277,8 +277,9 @@ github.com/carolynvs/datetime-printer v0.2.0/go.mod h1:p9W8ZUhmQUOVD5kiDuGXwRG65
 github.com/carolynvs/magex v0.7.0/go.mod h1:vZB3BkRfkd5ZMtkxJkCGbdFyWGoZiuNPKhx6uEQARmY=
 github.com/carolynvs/magex v0.7.1/go.mod h1:vZB3BkRfkd5ZMtkxJkCGbdFyWGoZiuNPKhx6uEQARmY=
 github.com/carolynvs/magex v0.7.2/go.mod h1:vZB3BkRfkd5ZMtkxJkCGbdFyWGoZiuNPKhx6uEQARmY=
-github.com/carolynvs/magex v0.8.0 h1:BCY0A6fLs37NZrIFBKuOMXda5wEIrUeTF4sHB601JVM=
 github.com/carolynvs/magex v0.8.0/go.mod h1:vZB3BkRfkd5ZMtkxJkCGbdFyWGoZiuNPKhx6uEQARmY=
+github.com/carolynvs/magex v0.8.1 h1:7QYsqIANzYbj9fgE3fJWOJf+DfkD0Ymr8kz0kNhXxFM=
+github.com/carolynvs/magex v0.8.1/go.mod h1:aBJBqUIBFyatSGOv0Ak6j8U+9PzotM600G6Dz0Df1Wg=
 github.com/casbin/casbin/v2 v2.1.2/go.mod h1:YcPU1XXisHhLzuxH9coDNf2FbKpjGlbCg3n9yuLkIJQ=
 github.com/cavaliercoder/go-cpio v0.0.0-20180626203310-925f9528c45e/go.mod h1:oDpT4efm8tSYHXV5tHSdRvBet/b/QzxZ+XyyPehvm3A=
 github.com/cbroglie/mustache v1.0.1 h1:ivMg8MguXq/rrz2eu3tw6g3b16+PQhoTn6EZAhst2mw=
