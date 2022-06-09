@@ -3,33 +3,26 @@ module get.porter.sh/plugin/kubernetes
 go 1.17
 
 replace (
-	// This is a temporary reference to the porter's release/v1 branch that
-	// conatins the new secret plugin protocol
-	get.porter.sh/porter => get.porter.sh/porter v1.0.0-alpha.19.0.20220519145811-23393bfc2dec
-
-	// See https://github.com/hashicorp/go-plugin/pull/127 and
-	// https://github.com/hashicorp/go-plugin/pull/163
-	// Also includes a branch we haven't PR'd yet: capture-yamux-logs
-	// Tagged from v1.4.0, the improved-configuration branch
-	github.com/hashicorp/go-plugin => github.com/getporter/go-plugin v1.4.3-improved-configuration.1
+	// Use the same replace that Porter uses. These our are long-term patches.
+	github.com/hashicorp/go-plugin => github.com/getporter/go-plugin v1.4.4-porter.1
 
 	// Fixes https://github.com/spf13/viper/issues/761
 	github.com/spf13/viper => github.com/getporter/viper v1.7.1-porter.2.0.20210514172839-3ea827168363
 )
 
 require (
-	get.porter.sh/magefiles v0.2.3
-	get.porter.sh/porter v1.0.0-alpha.19.0.20220519145811-23393bfc2dec
-	github.com/cnabio/cnab-go v0.23.2
+	get.porter.sh/magefiles v0.3.0
+	get.porter.sh/porter v1.0.0-alpha.22.0.20220617145247-d9662907f8d8
+	github.com/cnabio/cnab-go v0.23.4
 	github.com/hashicorp/go-hclog v1.2.1
 	github.com/hashicorp/go-plugin v1.4.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.2
-	k8s.io/api v0.24.0
-	k8s.io/apimachinery v0.24.0
-	k8s.io/client-go v0.24.0
+	k8s.io/api v0.24.1
+	k8s.io/apimachinery v0.24.1
+	k8s.io/client-go v0.24.1
 )
 
 require (
@@ -56,7 +49,7 @@ require (
 	github.com/carolynvs/aferox v0.3.0 // indirect
 	github.com/cbroglie/mustache v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
-	github.com/cyberphone/json-canonicalization v0.0.0-20210303052042-6bc126869bf4 // indirect
+	github.com/cyberphone/json-canonicalization v0.0.0-20220216171627-b6721b06b4ef // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
 	github.com/emicklei/go-restful v2.9.5+incompatible // indirect
