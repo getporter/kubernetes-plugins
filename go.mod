@@ -21,7 +21,7 @@ require (
 	get.porter.sh/magefiles v0.2.3
 	get.porter.sh/porter v1.0.0-alpha.19.0.20220519145811-23393bfc2dec
 	github.com/cnabio/cnab-go v0.23.2
-	github.com/hashicorp/go-hclog v1.2.0
+	github.com/hashicorp/go-hclog v1.2.1
 	github.com/hashicorp/go-plugin v1.4.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pkg/errors v0.9.1
@@ -58,7 +58,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
-	github.com/fatih/color v1.9.0 // indirect
+	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -83,7 +83,7 @@ require (
 	github.com/klauspost/pgzip v1.2.5 // indirect
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/magiconair/properties v1.8.1 // indirect
-	github.com/mattn/go-colorable v0.1.7 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mholt/archiver/v3 v3.5.1 // indirect
@@ -133,7 +133,7 @@ require (
 	go.uber.org/zap v1.19.1 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f // indirect
-	golang.org/x/sys v0.0.0-20220310020820-b874c991c1a5 // indirect
+	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
