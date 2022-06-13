@@ -20,16 +20,16 @@ replace (
 require (
 	get.porter.sh/magefiles v0.2.3
 	get.porter.sh/porter v1.0.0-alpha.19.0.20220519145811-23393bfc2dec
-	github.com/cnabio/cnab-go v0.23.2
+	github.com/cnabio/cnab-go v0.23.4
 	github.com/hashicorp/go-hclog v1.2.1
 	github.com/hashicorp/go-plugin v1.4.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.2
-	k8s.io/api v0.24.0
-	k8s.io/apimachinery v0.24.0
-	k8s.io/client-go v0.24.0
+	k8s.io/api v0.24.1
+	k8s.io/apimachinery v0.24.1
+	k8s.io/client-go v0.24.1
 )
 
 require (
