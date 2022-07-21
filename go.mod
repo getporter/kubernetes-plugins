@@ -31,7 +31,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/magefile/mage v1.13.0
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.19.0
+	github.com/onsi/gomega v1.20.0
 	github.com/tidwall/pretty v1.2.0
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
 	k8s.io/utils v0.0.0-20220706174534-f6158b442e7c
@@ -64,6 +64,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/gnostic v0.6.9 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
