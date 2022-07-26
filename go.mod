@@ -27,7 +27,7 @@ require (
 
 require (
 	get.porter.sh/operator v0.6.0
-	github.com/carolynvs/magex v0.8.1
+	github.com/carolynvs/magex v0.9.0
 	github.com/google/uuid v1.3.0
 	github.com/magefile/mage v1.13.0
 	github.com/onsi/ginkgo v1.16.5
