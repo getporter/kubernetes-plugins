@@ -3,6 +3,8 @@ module get.porter.sh/plugin/kubernetes
 go 1.17
 
 replace (
+	get.porter.sh/magefiles => github.com/carolynvs/magefiles v0.1.3-0.20220727152744-3c269f8ed65b
+
 	// Use the same replace that Porter uses. These our are long-term patches.
 	github.com/hashicorp/go-plugin => github.com/getporter/go-plugin v1.4.4-porter.1
 
@@ -27,7 +29,7 @@ require (
 
 require (
 	get.porter.sh/operator v0.6.0
-	github.com/carolynvs/magex v0.8.1
+	github.com/carolynvs/magex v0.9.0
 	github.com/google/uuid v1.3.0
 	github.com/magefile/mage v1.13.0
 	github.com/onsi/ginkgo v1.16.5
