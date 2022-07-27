@@ -9,8 +9,5 @@ pool:
 variables:
   GOVERSION: "1.18.4"
 
-env:
-  MAGEFILE_VERBOSE: true
-
 steps:
   - template: build-and-test.yml

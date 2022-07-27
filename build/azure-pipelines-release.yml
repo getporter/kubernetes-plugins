@@ -10,9 +10,6 @@ pr: none
 pool:
   vmImage: "ubuntu-latest"
 
-env:
-  MAGEFILE_VERBOSE: true
-
 variables:
   GOVERSION: "1.18.4"
   tag: $[replace(variables['Build.SourceBranch'],'refs/tags/','')]
