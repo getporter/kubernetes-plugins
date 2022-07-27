@@ -58,7 +58,7 @@ const (
 	operatorImage    = "porter-operator"
 	operatorRegistry = "ghcr.io/getporter"
 	// Porter version to use
-	porterVersion = "canary-v1"
+	porterVersion = "v1.0.0-beta.1"
 	// Docker registry for porter client container
 	porterRegistry   = "ghcr.io/getporter"
 	porterConfigFile = "./tests/integration/operator/testdata/operator_porter_config.yaml"

@@ -8,10 +8,13 @@ trigger:
 pr: none
 
 pool:
-  vmImage: "Ubuntu 18.04"
+  vmImage: "ubuntu-latest"
+
+env:
+  MAGEFILE_VERBOSE: true
 
 variables:
-  GOVERSION: "1.17.7"
+  GOVERSION: "1.18.4"
   tag: $[replace(variables['Build.SourceBranch'],'refs/tags/','')]
 
 steps:
