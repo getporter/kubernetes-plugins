@@ -340,10 +340,11 @@ github.com/cloudflare/cfssl v1.4.1/go.mod h1:KManx/OJPb5QY+y0+o/898AMcM128sF0bUR
 github.com/cloudflare/go-metrics v0.0.0-20151117154305-6a9aea36fb41/go.mod h1:eaZPlJWD+G9wseg1BuRXlHnjntPMrywMsyxf+LTOdP4=
 github.com/cloudflare/redoctober v0.0.0-20171127175943-746a508df14c/go.mod h1:6Se34jNoqrd8bTxrmJB2Bg2aoZ2CdSXonils9NsiNgo=
 github.com/cnabio/cnab-go v0.23.4/go.mod h1:9EmgHR51LFqQStzaC+xHPJlkD4OPsF6Ev5Y8e/YHEns=
-github.com/cnabio/cnab-go v0.23.5 h1:wV2/Jw9LjUfKy3i9ycFqDMaaGnmTL4wiCocAk4mACSQ=
-github.com/cnabio/cnab-go v0.23.5/go.mod h1:9EmgHR51LFqQStzaC+xHPJlkD4OPsF6Ev5Y8e/YHEns=
+github.com/cnabio/cnab-go v0.24.0 h1:l5dSAEUsGoccIGRgDmH4HncHfw1a2zaiEft/RG6LS8Y=
+github.com/cnabio/cnab-go v0.24.0/go.mod h1:Zm0HTH8xxzinB64SXm7KFSna7DEN0ZjZwrRwZpfgChU=
 github.com/cnabio/cnab-to-oci v0.3.4 h1:u1AUUplhKojCMgee17QkjU27yM1tfH9fOTFvxkrEqVw=
 github.com/cnabio/cnab-to-oci v0.3.4/go.mod h1:7f86Z39HUg67wg8dZvxvFpW2pGDjK3RwbJAMJGxTXHQ=
+github.com/cnabio/image-relocation v0.0.0-20220815190842-cd2f11ecad88/go.mod h1:E1bwI4v9AFrspAWqje0clEo31bHHH/YPxk1a4L5O3ZE=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
 github.com/cncf/udpa/go v0.0.0-20200629203442-efcf912fb354/go.mod h1:WmhPx2Nbnhtbo57+VJT5O0JRkEi1Wbu0z5j0R8u5Hbk=
 github.com/cncf/udpa/go v0.0.0-20201120205902-5459f2c99403/go.mod h1:WmhPx2Nbnhtbo57+VJT5O0JRkEi1Wbu0z5j0R8u5Hbk=
@@ -2138,8 +2139,9 @@ golang.org/x/sys v0.0.0-20220502124256-b6088ccd6cba/go.mod h1:oPkhp1MJrh7nUepCBc
 golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.0.0-20220708085239-5a0f0661e09d h1:/m5NbqQelATgoSPVC2Z23sR4kVNokFwDDyWh/3rGY+I=
 golang.org/x/sys v0.0.0-20220708085239-5a0f0661e09d/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab h1:2QkjZIsXupsJbJIdSjjUOgWK3aEtzyuh2mPt3l/CkeU=
+golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201117132131-f5c789dd3221/go.mod h1:Nr5EML6q2oocZ2LXRh80K7BxOlk5/8JxuGnuhpl+muw=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=

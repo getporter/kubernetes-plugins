@@ -13,7 +13,7 @@ replace (
 require (
 	get.porter.sh/magefiles v0.3.1
 	get.porter.sh/porter v1.0.0-beta.1
-	github.com/cnabio/cnab-go v0.23.5
+	github.com/cnabio/cnab-go v0.24.0
 	github.com/hashicorp/go-hclog v1.2.2
 	github.com/hashicorp/go-plugin v1.4.2
 	github.com/mitchellh/mapstructure v1.5.0
@@ -131,7 +131,7 @@ require (
 	go.uber.org/zap v1.19.1 // indirect
 	golang.org/x/net v0.0.0-20220708220712-1185a9018129 // indirect
 	golang.org/x/oauth2 v0.0.0-20220630143837-2104d58473e0 // indirect
-	golang.org/x/sys v0.0.0-20220708085239-5a0f0661e09d // indirect
+	golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab // indirect
 	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20220609170525-579cf78fd858 // indirect
