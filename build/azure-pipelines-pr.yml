@@ -4,10 +4,10 @@ pr:
 trigger: none
 
 pool:
-  vmImage: "Ubuntu 18.04"
+  vmImage: "ubuntu-latest"
 
 variables:
-  GOVERSION: "1.17.7"
+  GOVERSION: "1.18"
 
 steps:
   - template: build-and-test.yml

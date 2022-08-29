@@ -85,5 +85,10 @@ environment.
 `mage TestIntegration` run the porter command via the operator with the tests defined at
 [tests/integration/operator](tests/integration/operator).
 
+## Update kubernetes dependencies
 
+Run `go get -u k8s.io/client-go` to update dependencies. 
+This command should update all k8s.io: client-go, api, and apimachinery dependencies. 
+The version number for all these three packages should all be the same.
+Afterwards, run `go mod tidy` to validate the dependencies works.
 
