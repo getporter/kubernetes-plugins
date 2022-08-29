@@ -31,7 +31,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/magefile/mage v1.13.0
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.20.0
+	github.com/onsi/gomega v1.20.1
 	github.com/tidwall/pretty v1.2.0
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
 	k8s.io/utils v0.0.0-20220706174534-f6158b442e7c
