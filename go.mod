@@ -14,7 +14,7 @@ require (
 	get.porter.sh/magefiles v0.3.1
 	get.porter.sh/porter v1.0.0-beta.1
 	github.com/cnabio/cnab-go v0.24.0
-	github.com/hashicorp/go-hclog v1.2.2
+	github.com/hashicorp/go-hclog v1.3.0
 	github.com/hashicorp/go-plugin v1.4.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pkg/errors v0.9.1
