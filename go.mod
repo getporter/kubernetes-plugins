@@ -29,7 +29,7 @@ require (
 	get.porter.sh/operator v0.7.1
 	github.com/carolynvs/magex v0.9.0
 	github.com/google/uuid v1.3.0
-	github.com/magefile/mage v1.13.0
+	github.com/magefile/mage v1.14.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.20.2
 	github.com/tidwall/pretty v1.2.0
