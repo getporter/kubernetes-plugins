@@ -32,7 +32,7 @@ require (
 	github.com/magefile/mage v1.14.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.20.2
-	github.com/tidwall/pretty v1.2.0
+	github.com/tidwall/pretty v1.2.1
 	golang.org/x/sync v0.0.0-20220907140024-f12130a52804
 	k8s.io/utils v0.0.0-20220823124924-e9cbc92d1a73
 	sigs.k8s.io/controller-runtime v0.13.0
