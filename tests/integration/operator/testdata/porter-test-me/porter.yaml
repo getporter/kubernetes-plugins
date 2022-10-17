@@ -3,7 +3,7 @@
 # See https://porter.sh/author-bundles for documentation on how to configure your bundle
 # Uncomment out the sections below to take full advantage of what Porter can do!
 
-schemaVersion: 1.0.0-alpha.1
+schemaVersion: 1.0.0
 name: kubernetes-plugin
 version: 0.1.0
 description: "Porter bundle with test behaviors"
@@ -69,9 +69,9 @@ install:
       command: ./test-me.sh
       arguments:
         - install
-        - "{{ bundle.parameters.delay }}"
-        - "{{ bundle.parameters.exitStatus }}"
-        - "{{ bundle.parameters.password }}"
+        - ${ bundle.parameters.delay }
+        - ${ bundle.parameters.exitStatus }
+        - ${ bundle.parameters.password }
       outputs:
         - name: outAction
           jsonPath: "$.config.action"
@@ -90,8 +90,8 @@ uninstall:
       command: ./test-me.sh
       arguments:
         - uninstall
-        - "{{ bundle.parameters.delay }}"
-        - "{{ bundle.parameters.exitStatus }}"
+        - ${ bundle.parameters.delay }
+        - ${ bundle.parameters.exitStatus }
       outputs:
         - name: outAction
           jsonPath: "$.config.action"

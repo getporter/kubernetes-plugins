@@ -1,4 +1,4 @@
-schemaVersion: 1.0.0-alpha.1
+schemaVersion: 1.0.0
 name: kubernetes-plugin-test
 version: 1.0.0
 description: Test Bundle for kubernetes plugin
@@ -16,7 +16,7 @@ install:
       description: Echo credentials
       command: bash
       flags:
-        c: "'echo {{ bundle.credentials.test-cred }} >  /tmp/test_out'"
+        c: "'echo ${ bundle.credentials.test-cred } >  /tmp/test_out'"
       outputs:
         - name: test_out
           path: /tmp/test_out
@@ -26,7 +26,7 @@ upgrade:
       description: Echo credentials
       command: bash
       flags:
-        c: "'echo {{ bundle.credentials.test-cred }} >  /tmp/test_out'"
+        c: "'echo ${ bundle.credentials.test-cred } >  /tmp/test_out'"
       outputs:
         - name: test_out
           path: /tmp/test_out
@@ -36,7 +36,7 @@ uninstall:
       description: Echo credentials
       command: bash
       flags:
-        c: "'echo {{ bundle.credentials.test-cred }} >  /tmp/test_out'"
+        c: "'echo ${ bundle.credentials.test-cred } >  /tmp/test_out'"
       outputs:
         - name: test_out
           path: /tmp/test_out

@@ -300,7 +300,7 @@ func NewInstallation(installationName, installationNamespace string) *porterv1.I
 			Namespace: installationNamespace,
 		},
 		Spec: porterv1.InstallationSpec{
-			SchemaVersion: "1.0.1",
+			SchemaVersion: "1.0.2",
 			Name:          installationName,
 			Namespace:     installationNamespace,
 			Bundle: porterv1.OCIReferenceParts{
@@ -405,7 +405,7 @@ type PorterCfgOpts struct {
 	SecretsNamespace string
 }
 
-//NewPorterCofnig GetDefaultPorterConfig - DefaultStorage, DefaultSecretsPlugin and DefaultStorageConfig set.  We tweak DefaultSecrets and SecretsConfig as needed
+// NewPorterCofnig GetDefaultPorterConfig - DefaultStorage, DefaultSecretsPlugin and DefaultStorageConfig set.  We tweak DefaultSecrets and SecretsConfig as needed
 func NewPorterConfig(ns string) *porterv1.PorterConfig {
 	porterCfg := &porterv1.PorterConfig{
 		TypeMeta: metav1.TypeMeta{
