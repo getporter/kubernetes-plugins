@@ -32,7 +32,7 @@
         "reveal": "always",
         "panel": "shared"
       },
-      "args": ["storage","migrate","--debug","--debug-plugins"],
+      "args": ["storage","migrate","--verbosity=debug"]
     },
     {
       "label": "KillDebugProcesses",

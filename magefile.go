@@ -58,7 +58,7 @@ const (
 	operatorImage    = "porter-operator"
 	operatorRegistry = "ghcr.io/getporter"
 	// Porter version to use
-	porterVersion = "canary-v1"
+	porterVersion = "v1.0.1"
 	// Docker registry for porter client container
 	porterRegistry   = "ghcr.io/getporter"
 	porterConfigFile = "./tests/integration/operator/testdata/operator_porter_config.yaml"
@@ -212,7 +212,7 @@ func testLocalIntegration() {
 	kubectl("apply", "-f", "tests/testdata/credentials-secret.yaml", "-n", localTestNamespace).RunV()
 	buildPorterCmd("credentials", "apply", "kubernetes-plugin-test-secret.json").
 		In("tests/testdata").RunV()
-	buildPorterCmd("install", "--force", "--cred", "kubernetes-plugin-test", "--debug", "--debug-plugins").
+	buildPorterCmd("install", "--force", "--cred", "kubernetes-plugin-test", "--verbosity=debug").
 		In("tests/testdata").RunV()
 }
 
@@ -274,7 +274,7 @@ func CleanTestdata() {
 func DeployOperator() {
 	mg.Deps(tests.EnsureTestCluster)
 
-	buildPorterCmd("credentials", "apply", "hack/creds.yaml", "-n=operator", "--debug", "--debug-plugins").Must().RunV()
+	buildPorterCmd("credentials", "apply", "hack/creds.yaml", "-n=operator", "--verbosity=debug").Must().RunV()
 	if os.Getenv("PORTER_OPERATOR_REF") != "" {
 		operatorBundleRef = os.Getenv("PORTER_OPERATOR_REF")
 	}
