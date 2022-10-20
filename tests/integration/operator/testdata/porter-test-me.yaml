@@ -3,7 +3,7 @@ kind: Installation
 metadata:
   name: porter-test-me2
 spec:
-  schemaVersion: 1.0.1
+  schemaVersion: 1.0.2
   namespace: dev
   name: foo2
   bundle:
