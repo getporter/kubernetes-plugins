@@ -405,7 +405,7 @@ type PorterCfgOpts struct {
 	SecretsNamespace string
 }
 
-// NewPorterCofnig GetDefaultPorterConfig - DefaultStorage, DefaultSecretsPlugin and DefaultStorageConfig set.  We tweak DefaultSecrets and SecretsConfig as needed
+// NewPorterConfig GetDefaultPorterConfig - DefaultStorage, DefaultSecretsPlugin and DefaultStorageConfig set.  We tweak DefaultSecrets and SecretsConfig as needed
 func NewPorterConfig(ns string) *porterv1.PorterConfig {
 	porterCfg := &porterv1.PorterConfig{
 		TypeMeta: metav1.TypeMeta{
