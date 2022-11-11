@@ -1,5 +1,4 @@
 //go:build mage
-// +build mage
 
 package main
 
@@ -54,11 +53,11 @@ const (
 	// Container name of the local registry
 	registryContainer = "registry"
 	// Operator bundle to deploy for integration tests
-	operatorVersion  = "v0.5.2"
+	operatorVersion  = "v0.7.2"
 	operatorImage    = "porter-operator"
 	operatorRegistry = "ghcr.io/getporter"
 	// Porter version to use
-	porterVersion = "v1.0.1"
+	porterVersion = "v1.0.2"
 	// Docker registry for porter client container
 	porterRegistry   = "ghcr.io/getporter"
 	porterConfigFile = "./tests/integration/operator/testdata/operator_porter_config.yaml"
