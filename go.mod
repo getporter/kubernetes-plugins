@@ -12,7 +12,7 @@ replace (
 
 require (
 	get.porter.sh/magefiles v0.3.3
-	get.porter.sh/operator v0.7.2
+	get.porter.sh/operator v0.7.3
 	get.porter.sh/porter v1.0.2
 	github.com/carolynvs/magex v0.9.0
 	github.com/cnabio/cnab-go v0.24.1
