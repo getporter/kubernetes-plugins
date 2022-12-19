@@ -41,8 +41,8 @@ cloud.google.com/go/storage v1.14.0/go.mod h1:GrKmX003DSIwi9o29oFT7YDnHYwZoctc3f
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 get.porter.sh/magefiles v0.3.3 h1:vsgOnzZDHWqHCYTzv0OeVTLXxuD/ZtD0xff75PkcBA0=
 get.porter.sh/magefiles v0.3.3/go.mod h1:KzKenKVauKKDhZ5FERVhqSz8m/xVSsRzOPseDA4UDIE=
-get.porter.sh/operator v0.7.2 h1:ihrOwSte9rwlZzxVpS71a3WY8tsuzZpB1vwqwtX8HTw=
-get.porter.sh/operator v0.7.2/go.mod h1:+xeLuqaAuwIkeRJFPTW9kH3sn/p9C47auJlY7Hn6n2E=
+get.porter.sh/operator v0.7.3 h1:tW78x6bGMi20M57YP+PxZ6mQlg659M4JBMgDG1iXf5I=
+get.porter.sh/operator v0.7.3/go.mod h1:+xeLuqaAuwIkeRJFPTW9kH3sn/p9C47auJlY7Hn6n2E=
 get.porter.sh/porter v1.0.2 h1:F9j0XnVur6/Mp299fR70HV/xnQw8Vh0SjCXgANuesq8=
 get.porter.sh/porter v1.0.2/go.mod h1:oosftEdadQecSmHdYKKmp8yvoMTSBflmLm8OFCMIQDQ=
 github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 h1:UQHMgLO+TxOElx5B5HZ4hJQsoJ/PvUvKRhJHDQXO8P8=
