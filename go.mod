@@ -12,7 +12,7 @@ replace (
 
 require (
 	get.porter.sh/magefiles v0.3.3
-	get.porter.sh/operator v0.7.3
+	get.porter.sh/operator v0.7.4
 	get.porter.sh/porter v1.0.2
 	github.com/carolynvs/magex v0.9.0
 	github.com/cnabio/cnab-go v0.24.1
@@ -47,7 +47,7 @@ require (
 	github.com/cyberphone/json-canonicalization v0.0.0-20220623050100-57a0ce2678a7 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
-	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
+	github.com/emicklei/go-restful/v3 v3.10.1 // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect

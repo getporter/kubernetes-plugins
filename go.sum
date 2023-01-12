@@ -41,8 +41,8 @@ cloud.google.com/go/storage v1.14.0/go.mod h1:GrKmX003DSIwi9o29oFT7YDnHYwZoctc3f
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 get.porter.sh/magefiles v0.3.3 h1:vsgOnzZDHWqHCYTzv0OeVTLXxuD/ZtD0xff75PkcBA0=
 get.porter.sh/magefiles v0.3.3/go.mod h1:KzKenKVauKKDhZ5FERVhqSz8m/xVSsRzOPseDA4UDIE=
-get.porter.sh/operator v0.7.3 h1:tW78x6bGMi20M57YP+PxZ6mQlg659M4JBMgDG1iXf5I=
-get.porter.sh/operator v0.7.3/go.mod h1:+xeLuqaAuwIkeRJFPTW9kH3sn/p9C47auJlY7Hn6n2E=
+get.porter.sh/operator v0.7.4 h1:eoEWYmuKPx9G4d6jo4f8OwPDdcjx/y6XlawwOf5HMqg=
+get.porter.sh/operator v0.7.4/go.mod h1:T0mXGFr4Kb7zK1v+6Xsq4qvU1s7lw/4cn0DaLerEXWE=
 get.porter.sh/porter v1.0.2 h1:F9j0XnVur6/Mp299fR70HV/xnQw8Vh0SjCXgANuesq8=
 get.porter.sh/porter v1.0.2/go.mod h1:oosftEdadQecSmHdYKKmp8yvoMTSBflmLm8OFCMIQDQ=
 github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 h1:UQHMgLO+TxOElx5B5HZ4hJQsoJ/PvUvKRhJHDQXO8P8=
@@ -160,8 +160,8 @@ github.com/eapache/go-resiliency v1.1.0/go.mod h1:kFI+JgMyC7bLPUVY133qvEBtVayf5m
 github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21/go.mod h1:+020luEh2TKB4/GOp8oxxtq0Daoen/Cii55CzbTV6DU=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
 github.com/edsrzf/mmap-go v1.0.0/go.mod h1:YO35OhQPt3KJa3ryjFM5Bs14WD66h8eGKpfaBNrHW5M=
-github.com/emicklei/go-restful/v3 v3.9.0 h1:XwGDlfxEnQZzuopoqxwSEllNcCOM9DhhFyhFIIGKwxE=
-github.com/emicklei/go-restful/v3 v3.9.0/go.mod h1:6n3XBCmQQb25CM2LCACGz8ukIrRry+4bhvbpWn3mrbc=
+github.com/emicklei/go-restful/v3 v3.10.1 h1:rc42Y5YTp7Am7CS630D7JmhRjq4UlEUuEKfrDac4bSQ=
+github.com/emicklei/go-restful/v3 v3.10.1/go.mod h1:6n3XBCmQQb25CM2LCACGz8ukIrRry+4bhvbpWn3mrbc=
 github.com/envoyproxy/go-control-plane v0.6.9/go.mod h1:SBwIajubJHhxtWwsL9s8ss4safvEdbitLhGGK48rN6g=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
