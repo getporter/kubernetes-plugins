@@ -11,7 +11,7 @@ replace (
 )
 
 require (
-	get.porter.sh/magefiles v0.3.4
+	get.porter.sh/magefiles v0.4.0
 	get.porter.sh/operator v0.7.4
 	get.porter.sh/porter v1.0.2
 	github.com/carolynvs/magex v0.9.0
