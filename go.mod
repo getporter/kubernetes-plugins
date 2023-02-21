@@ -34,7 +34,12 @@ require (
 	sigs.k8s.io/controller-runtime v0.14.4
 )
 
-require go.opentelemetry.io/otel/metric v0.34.0 // indirect
+require (
+	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
+	github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38 // indirect
+	go.opentelemetry.io/otel/metric v0.34.0 // indirect
+	golang.org/x/tools v0.6.0 // indirect
+)
 
 require (
 	github.com/Masterminds/semver v1.5.0 // indirect
@@ -95,7 +100,7 @@ require (
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/onsi/ginkgo/v2 v2.8.1
+	github.com/onsi/ginkgo/v2 v2.8.3
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/osteele/liquid v1.3.0 // indirect
 	github.com/osteele/tuesday v1.0.3 // indirect
