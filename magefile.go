@@ -57,7 +57,7 @@ const (
 	operatorImage    = "porter-operator"
 	operatorRegistry = "ghcr.io/getporter"
 	// Porter version to use
-	porterVersion = "v1.0.2"
+	porterVersion = "v1.0.9"
 	// Docker registry for porter client container
 	porterRegistry   = "ghcr.io/getporter"
 	porterConfigFile = "./tests/integration/operator/testdata/operator_porter_config.yaml"
