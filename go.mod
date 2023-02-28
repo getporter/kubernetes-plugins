@@ -129,7 +129,7 @@ require (
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/onsi/ginkgo/v2 v2.8.3
+	github.com/onsi/ginkgo/v2 v2.8.4
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/osteele/liquid v1.3.0 // indirect
 	github.com/osteele/tuesday v1.0.3 // indirect
