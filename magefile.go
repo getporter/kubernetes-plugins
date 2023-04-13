@@ -85,13 +85,16 @@ var operatorBundleRef = fmt.Sprintf("%s/%s:%s", operatorRegistry, operatorImage,
 // Build a command that stops the build on if the command fails
 var must = shx.CommandBuilder{StopOnError: true}
 
-// Publish the cross-compiled binaries.
+// Publish uploads the cross-compiled binaries for the plugin
 func Publish() {
+	mg.SerialDeps(porter.UseBinForPorterHome, porter.EnsurePorter)
+
+	releases.PreparePluginForPublish(pluginName)
 	releases.PublishPlugin(pluginName)
 	releases.PublishPluginFeed(pluginName)
 }
 
-// Test out publish locally, with your github forks
+// TestPublish tries out publish locally, with your github forks
 // Assumes that you forked and kept the repository name unchanged.
 func TestPublish(username string) {
 	pluginRepo := fmt.Sprintf("github.com/%s/%s-plugins", username, pluginName)
