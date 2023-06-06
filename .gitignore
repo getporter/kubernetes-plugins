@@ -8,3 +8,4 @@
 kind.config
 coverage-integration.out
 build/git_askpass.sh
+hack/arm-mongodb-vals.yaml
