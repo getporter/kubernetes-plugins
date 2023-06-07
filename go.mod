@@ -12,7 +12,7 @@ replace (
 
 require (
 	get.porter.sh/magefiles v0.5.1
-	get.porter.sh/operator v0.7.4
+	get.porter.sh/operator v0.8.2
 	get.porter.sh/porter v1.0.9
 	github.com/carolynvs/magex v0.9.0
 	github.com/cnabio/cnab-go v0.25.1
@@ -139,7 +139,7 @@ require (
 	github.com/qri-io/jsonpointer v0.1.1 // indirect
 	github.com/qri-io/jsonschema v0.2.2-0.20210831022256-780655b2ba0e // indirect
 	github.com/rivo/uniseg v0.3.4 // indirect
-	github.com/spf13/afero v1.9.3 // indirect
+	github.com/spf13/afero v1.9.5 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
