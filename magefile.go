@@ -15,6 +15,7 @@ import (
 
 	"get.porter.sh/magefiles/ci"
 	"get.porter.sh/magefiles/docker"
+	"get.porter.sh/magefiles/git"
 
 	// mage:import
 	_ "get.porter.sh/magefiles/docker"
@@ -490,4 +491,10 @@ func BuildLocalPorterAgent() {
 	}
 	err := buildImage(localAgentImgName)
 	mgx.Must(err)
+}
+
+// SetupDCO configures your git repository to automatically sign your commits
+// to comply with our DCO
+func SetupDCO() error {
+	return git.SetupDCO()
 }
