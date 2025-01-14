@@ -51,13 +51,13 @@ func (s *Store) connect() error {
 	if s.clientSet != nil {
 		return nil
 	}
-	s.logger.Info(fmt.Sprintf("Store.connect: pre-clientset %s : %s", "namespace", s.namespace))
+	s.logger.Debug(fmt.Sprintf("Store.connect: pre-clientset %s : %s", "namespace", s.namespace))
 	clientSet, namespace, err := k8shelper.GetClientSet(s.namespace)
 	if err != nil {
 		return err
 	}
 	s.namespace = *namespace
-	s.logger.Info(fmt.Sprintf("Store.connect: post-clientset %s : %s", "namespace", s.namespace))
+	s.logger.Debug(fmt.Sprintf("Store.connect: post-clientset %s : %s", "namespace", s.namespace))
 
 	s.clientSet = clientSet
 
