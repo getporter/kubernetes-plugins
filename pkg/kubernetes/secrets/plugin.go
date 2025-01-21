@@ -35,7 +35,7 @@ func NewPlugin(cxt *portercontext.Context, pluginConfig config.Config) (hplugin.
 		JSONFormat: true,
 	})
 	cfg := PluginConfig{Logger: logger, Namespace: pluginConfig.Namespace}
-	logger.Info(fmt.Sprintf("NewPlugin.Config.Namespace: %s", cfg.Namespace))
+	logger.Debug(fmt.Sprintf("NewPlugin.Config.Namespace: %s", cfg.Namespace))
 	if err := mapstructure.Decode(pluginConfig, &cfg); err != nil {
 		return nil, errors.Wrapf(err, "error decoding %s plugin config from %#v", PluginKey, pluginConfig)
 	}
