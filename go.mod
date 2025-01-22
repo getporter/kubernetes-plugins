@@ -29,7 +29,7 @@ require (
 	golang.org/x/sync v0.10.0
 	k8s.io/api v0.32.1
 	k8s.io/apimachinery v0.32.1
-	k8s.io/client-go v0.31.2
+	k8s.io/client-go v0.32.1
 	k8s.io/utils v0.0.0-20241104163129-6fe5fd82f078
 	sigs.k8s.io/controller-runtime v0.17.2
 )
@@ -70,6 +70,7 @@ require (
 	golang.org/x/tools v0.26.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241209162323-e6fa225c2576 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241209162323-e6fa225c2576 // indirect
+	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
 )
 
@@ -106,7 +107,6 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/yamux v0.1.2 // indirect
-	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jeremywohl/flatten v1.0.1 // indirect
 	github.com/jhump/protoreflect v1.6.1 // indirect
