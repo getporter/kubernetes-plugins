@@ -30,7 +30,7 @@ require (
 	github.com/tidwall/pretty v1.2.1
 	golang.org/x/sync v0.11.0
 	k8s.io/api v0.32.1
-	k8s.io/apimachinery v0.32.1
+	k8s.io/apimachinery v0.32.2
 	k8s.io/client-go v0.32.1
 	k8s.io/utils v0.0.0-20241104163129-6fe5fd82f078
 	sigs.k8s.io/controller-runtime v0.17.2
