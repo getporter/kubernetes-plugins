@@ -26,12 +26,12 @@ import (
 	// mage:import
 	_ "get.porter.sh/magefiles/tests"
 	"get.porter.sh/plugin/kubernetes/mage/setup"
-	"github.com/carolynvs/magex/mgx"
-	"github.com/carolynvs/magex/pkg"
-	"github.com/carolynvs/magex/shx"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/target"
 	"github.com/pkg/errors"
+	"github.com/uwu-tools/magex/mgx"
+	"github.com/uwu-tools/magex/pkg"
+	"github.com/uwu-tools/magex/shx"
 )
 
 const (
