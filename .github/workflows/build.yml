@@ -22,7 +22,7 @@ jobs:
           cache: true
           cache-dependency-path: go.sum
       - name: Set up Mage
-        run: go run mage.go EnsureMage
+        run: go run mage.go ConfigureAgent
       - name: Build
         run: mage Build
       - name: Test
