@@ -196,6 +196,11 @@ func verifyVersionStamp() {
 func TestLocalIntegration() {
 	mg.Deps(Build)
 
+	// Ensure cluster connection is available
+	if !useCluster() {
+		mgx.Must(fmt.Errorf("no test cluster available"))
+	}
+
 	ctx, _ := kubectl("config", "current-context").OutputV()
 	testLocalIntegration()
 	
