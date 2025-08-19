@@ -54,7 +54,7 @@ const (
 	// Container name of the local registry
 	registryContainer = "registry"
 	// Operator bundle to deploy for integration tests
-	operatorVersion  = "v0.7.2"
+	operatorVersion  = "v1.1.0"
 	operatorImage    = "porter-operator"
 	operatorRegistry = "ghcr.io/getporter"
 	// Porter version to use
