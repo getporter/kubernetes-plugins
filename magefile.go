@@ -198,7 +198,12 @@ func TestLocalIntegration() {
 
 	ctx, _ := kubectl("config", "current-context").OutputV()
 	testLocalIntegration()
-	must.RunV("go", "test", "-v", "-tags=integration", "./tests/integration/local/...")
+	
+	// Set KUBECONFIG environment for the Go tests
+	kubeconfig := fmt.Sprintf("KUBECONFIG=%s", os.Getenv("KUBECONFIG"))
+	must.Command("go", "test", "-v", "-tags=integration", "./tests/integration/local/...").
+		Env(kubeconfig).RunV()
+		
 	if ctx != "" {
 		kubectl("config", "use-context", ctx).RunV()
 	}
