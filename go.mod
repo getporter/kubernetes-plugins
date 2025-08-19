@@ -1,8 +1,6 @@
 module get.porter.sh/plugin/kubernetes
 
-go 1.23.0
-
-toolchain go1.23.4
+go 1.23.4
 
 replace (
 	// Use the same replace that Porter uses. These our are long-term patches.
